@@ -1,99 +1,143 @@
 <template>
-  <v-app-bar color="transparent" app dark height="72" class="menu-bar">
+  <v-app-bar
+    color="transparent"
+    app
+    dark
+    height="72"
+    class="menu-bar d-flex justify-between align-center px-4"
+  >
     <v-btn text @click="goToHome" class="navbar-logo-btn">
       <v-img class="home-icon"></v-img>
     </v-btn>
 
-    <v-spacer></v-spacer>
+    <v-spacer />
 
-    <v-btn text @click="goToHome" class="btn-text"> HOME </v-btn>
-    <v-btn
-      v-if="
-        kakaoAuthenticationStore.isAuthenticated ||
-        googleAuthenticationStore.isAuthenticated ||
-        naverAuthenticationStore.isAuthenticated
-      "
-      text
-      @click="goToReviewListPage"
-      class="btn-text"
+    <div
+      v-if="!$vuetify.display.smAndDown"
+      class="d-flex align-center flex-grow-1 justify-center"
+      style="gap: 16px"
     >
-      REVIEW
-    </v-btn>
+      <v-btn text @click="goToHome" class="btn-text"> HOME </v-btn>
+      <v-btn
+        v-if="
+          kakaoAuthenticationStore.isAuthenticated ||
+          googleAuthenticationStore.isAuthenticated ||
+          naverAuthenticationStore.isAuthenticated
+        "
+        text
+        @click="goToReviewListPage"
+        class="btn-text"
+      >
+        REVIEW
+      </v-btn>
 
-    <v-btn text @click="goToProductList" class="btn-text">
-      COMPANY REPORT
-    </v-btn>
-    <v-btn text @click="goToLlmTestPage" class="btn-text"> AI INTERVIEW </v-btn>
+      <v-btn text @click="goToProductList" class="btn-text">
+        COMPANY REPORT
+      </v-btn>
+      <v-btn text @click="goToLlmTestPage" class="btn-text">
+        AI INTERVIEW
+      </v-btn>
 
-    <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
 
-    <!-- 로그인 후 화면-->
-    <v-menu
-      v-if="
-        kakaoAuthenticationStore.isAuthenticated ||
-        googleAuthenticationStore.isAuthenticated ||
-        naverAuthenticationStore.isAuthenticated
-      "
-      close-on-content-click
-    >
+      <!-- 로그인 후 화면-->
+      <v-menu
+        v-if="
+          kakaoAuthenticationStore.isAuthenticated ||
+          googleAuthenticationStore.isAuthenticated ||
+          naverAuthenticationStore.isAuthenticated
+        "
+        close-on-content-click
+      >
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" class="btn-text" style="margin-right: 14px">
+            <b>My Page</b>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(item, index) in myPageItems"
+            :key="index"
+            @click="item.action"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <!--추후 관리자 추가하여 교체예정-->
+      <v-menu
+        v-if="githubAuthenticationStore.isAuthenticated"
+        close-on-content-click
+      >
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" class="btn-text" style="margin-right: 14px">
+            <b>ADMIN</b>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(item, index) in adminPageList"
+            :key="index"
+            @click="item.action"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <!--여기까지-->
+
+      <!--로그인/로그아웃 버튼-->
+      <v-btn
+        v-if="
+          !kakaoAuthenticationStore.isAuthenticated &&
+          !googleAuthenticationStore.isAuthenticated &&
+          !naverAuthenticationStore.isAuthenticated &&
+          !githubAuthenticationStore.isAuthenticated
+        "
+        text
+        @click="signIn"
+        class="btn-login"
+      >
+        <!-- <v-icon left>mdi-login</v-icon> -->
+        LOGIN
+      </v-btn>
+
+      <v-btn v-else text @click="signOut" class="btn-logout">
+        <!-- <v-icon left>mdi-logout</v-icon> -->
+        LOGOUT
+      </v-btn>
+    </div>
+
+    <!--햄메뉴-->
+    <v-menu v-if="$vuetify.display.smAndDown" offset-y right>
+      <!-- 햄버거 버튼이 메뉴 트리거 역할 -->
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" class="btn-text" style="margin-right: 14px">
-          <b>My Page</b>
-        </v-btn>
+        <v-app-bar-nav-icon v-bind="props" />
       </template>
+
+      <!-- 드롭다운으로 뜨는 메뉴 항목 -->
       <v-list>
-        <v-list-item
-          v-for="(item, index) in myPageItems"
-          :key="index"
-          @click="item.action"
-        >
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        <v-list-item @click="goToHome">
+          <v-list-item-title>HOME</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="goToProductList">
+          <v-list-item-title>COMPANY REPORT</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="goToLlmTestPage">
+          <v-list-item-title>AI INTERVIEW</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="goToReviewListPage" v-if="isLoggedIn">
+          <v-list-item-title>REVIEW</v-list-item-title>
+        </v-list-item>
+        <v-list-item v-if="!isLoggedIn" @click="signIn">
+          <v-list-item-title>LOGIN</v-list-item-title>
+        </v-list-item>
+        <v-list-item v-else @click="signOut">
+          <v-list-item-title>LOGOUT</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
-
-    <!--추후 관리자 추가하여 교체예정-->
-    <v-menu
-      v-if="githubAuthenticationStore.isAuthenticated"
-      close-on-content-click
-    >
-      <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" class="btn-text" style="margin-right: 14px">
-          <b>ADMIN</b>
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-item
-          v-for="(item, index) in adminPageList"
-          :key="index"
-          @click="item.action"
-        >
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-    <!--여기까지-->
-
-    <!--로그인/로그아웃 버튼-->
-    <v-btn
-      v-if="
-        !kakaoAuthenticationStore.isAuthenticated &&
-        !googleAuthenticationStore.isAuthenticated &&
-        !naverAuthenticationStore.isAuthenticated &&
-        !githubAuthenticationStore.isAuthenticated
-      "
-      text
-      @click="signIn"
-      class="btn-login"
-    >
-      <!-- <v-icon left>mdi-login</v-icon> -->
-      LOGIN
-    </v-btn>
-
-    <v-btn v-else text @click="signOut" class="btn-logout">
-      <!-- <v-icon left>mdi-logout</v-icon> -->
-      LOGOUT
-    </v-btn>
   </v-app-bar>
 </template>
 
@@ -116,6 +160,14 @@ const authenticationStore = useAuthenticationStore();
 const reviewStore = useReviewStore();
 
 const router = useRouter();
+const drawer = ref(false);
+const isLoggedIn = computed(
+  () =>
+    kakaoAuthenticationStore.isAuthenticated ||
+    googleAuthenticationStore.isAuthenticated ||
+    naverAuthenticationStore.isAuthenticated ||
+    githubAuthenticationStore.isAuthenticated
+);
 
 // 데이터 선언
 
@@ -253,7 +305,12 @@ onMounted(async () => {
 .navbar-logo-btn {
   display: flex;
   align-items: center;
-  margin-left: 80px !important;
+  padding: 0 !important;
+  margin-left: 8px !important;
+}
+
+.v-app-bar-nav-icon {
+  color: white;
 }
 
 .home-icon {

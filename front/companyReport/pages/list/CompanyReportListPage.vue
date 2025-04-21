@@ -224,14 +224,15 @@
               companyReport.companyReportName
             }}</v-card-title>
             <div class="company-keyword-container">
-              <v-text
-                v-for="(keyword, index) in companyReport.keyword
+              <span
+                v-for="(keyword, index) in (companyReport.keyword || '')
                   .split(',')
                   .slice(0, 2)"
+                :key="index"
                 class="companyReport-keyword"
               >
                 {{ keyword }}
-              </v-text>
+              </span>
             </div>
           </v-card>
         </v-col>

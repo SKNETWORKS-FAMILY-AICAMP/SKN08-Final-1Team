@@ -290,7 +290,7 @@ onMounted(async () => {
   justify-content: center; /* 수평 가운데 정렬 */
   align-items: center; /* 수직 가운데 정렬 */
   padding: 0;
-  background: url("@/assets/images/fixed/login_bg6.png") no-repeat center center; /* 배경 이미지 설정 */
+  background: url("@/assets/images/fixed/login_bg61.jpg") no-repeat center center; /* 배경 이미지 설정 */
   background-size: cover; /* 배경 이미지 크기 조정 */
 }
 

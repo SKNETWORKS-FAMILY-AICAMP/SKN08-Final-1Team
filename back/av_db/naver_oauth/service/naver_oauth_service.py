@@ -14,3 +14,8 @@ class NaverOauthService(ABC):
     @abstractmethod
     def requestUserInfo(self, accessToken):
         pass
+
+    @abstractmethod
+    def requestNaverWithdrawLink(self, accessToken):
+        pass
+

@@ -161,16 +161,17 @@ class GoogleOauthController(viewsets.ViewSet):
         if not userToken:
             return JsonResponse({"error": "Authorization 헤더가 필요합니다."}, status=400)
 
-        accountId = self.redisService.getValue(userToken)
+        accountId = self.redisService.getValueByKey(userToken)
         if not accountId:
             return JsonResponse({"error": "유효하지 않은 userToken입니다."}, status=400)
 
-        accessToken = self.redisService.getValue(accountId)
+        accessToken = self.redisService.getValueByKey(accountId)
         if not accessToken:
             return JsonResponse({"error": "AccessToken을 찾을 수 없습니다."}, status=400)
 
         # 여기서 바로 Service 호출
         result = self.googleOauthService.requestGoogleWithdrawLink(accessToken)
+        print(f"탈퇴 결과 result: {result}")
 
         return JsonResponse(result, status=HTTP_200_OK)
 

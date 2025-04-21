@@ -2,11 +2,13 @@ import uuid
 
 from django.db import transaction
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.status import HTTP_200_OK
-
+from streamlit import header
 
 from account.service.account_service_impl import AccountServiceImpl
 from account_profile.service.account_profile_service_impl import AccountProfileServiceImpl
@@ -17,9 +19,12 @@ from redis_cache.service.redis_cache_service_impl import RedisCacheServiceImpl
 
 class NaverOauthController(viewsets.ViewSet):
     naverOauthService = NaverOauthServiceImpl.getInstance()
-    redisCacheService = RedisCacheServiceImpl.getInstance()
+    redisService = RedisCacheServiceImpl.getInstance()   # 🔥 이거 추가!
     accountService = AccountServiceImpl.getInstance()
     accountProfileService = AccountProfileServiceImpl.getInstance()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def requestNaverOauthLink(self, request):
         url = self.naverOauthService.requestNaverOauthLink()
@@ -51,6 +56,7 @@ class NaverOauthController(viewsets.ViewSet):
 
             with transaction.atomic():
                 userInfo = self.naverOauthService.requestUserInfo(accessToken)
+                print(f"{header}")
                 print(f"{userInfo}")
                 response_data = userInfo.get('response',{})
                 user_id = response_data.get('id', '')  # 사용자 ID
@@ -130,8 +136,8 @@ class NaverOauthController(viewsets.ViewSet):
     def __createUserTokenWithAccessToken(self, account, accessToken):
         try:
             userToken = str(uuid.uuid4())
-            self.redisCacheService.storeKeyValue(account.getId(), accessToken)
-            self.redisCacheService.storeKeyValue(userToken, account.getId())
+            self.redisService.storeKeyValue(account.getId(), accessToken)
+            self.redisService.storeKeyValue(userToken, account.getId())
 
             if not account or not account.getId():
                 raise ValueError("Invalid account ID")
@@ -142,6 +148,28 @@ class NaverOauthController(viewsets.ViewSet):
             print('Redis에 토큰 저장 중 에러:', e)
             raise RuntimeError('Redis에 토큰 저장 중 에러')
 
+    @action(detail=False, methods=['post'])
+    @csrf_exempt
+    def requestNaverWithdrawLink(self, request):
+        """
+        네이버 OAuth 회원탈퇴 요청
+        """
+        userToken = request.headers.get("Authorization")
+        if not userToken:
+            return JsonResponse({"error": "Authorization 헤더가 필요합니다."}, status=400)
+
+        userToken = userToken.replace("Bearer ", "")
+        accountId = self.redisService.getValueByKey(userToken)
+        if not accountId:
+            return JsonResponse({"error": "유효하지 않은 userToken입니다."}, status=400)
+
+        accessToken = self.redisService.getValueByKey(accountId)
+        if not accessToken:
+            return JsonResponse({"error": "AccessToken을 찾을 수 없습니다."}, status=400)
+
+        result = self.naverOauthService.requestNaverWithdrawLink(accessToken)
+
+        return JsonResponse(result, status=HTTP_200_OK)
 
     # def dropRedisTokenForLogout(self, request):
     #     try:

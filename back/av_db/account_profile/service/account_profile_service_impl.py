@@ -80,9 +80,12 @@ class AccountProfileServiceImpl(AccountProfileService):
         print("adminProfile 진입")
 
         account = self.__accountRepository.findById(accountId)
-        saveAdminProfile = self.__accountProfileRepository.saveAdmin(account, email)
-        if saveAdminProfile is not None:
-            print(f"Profile 생성 성공: {saveAdminProfile}")
+        savedAdminProfile = self.__accountProfileRepository.saveAdmin(
+            account,
+            email,
+        )
+        if savedAdminProfile is not None:
+            print(f"Profile 생성 성공: {savedAdminProfile}")
             return True
 
         print("adminProfile 생성 실패")

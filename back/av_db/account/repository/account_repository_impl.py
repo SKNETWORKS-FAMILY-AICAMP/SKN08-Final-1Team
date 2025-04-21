@@ -110,11 +110,14 @@ class AccountRepositoryImpl(AccountRepository):
 
     # DB에서 조회
     def findById(self, accountId):
+        print("여기까찌 옴")
         try:
-            return Account.objects.get(id=accountId)
+            account = Account.objects.get(id=accountId)
+            print(f"Account 찾음: {account}")
+            return account
         except ObjectDoesNotExist:
-            raise ObjectDoesNotExist(f"Account ID {accountId} 존재하지 않음.")
-
+            print(f"Account ID {accountId} 존재하지 않음.")
+            return None
     def findByEmail(self, email):
         try:
             print(f"{email}")

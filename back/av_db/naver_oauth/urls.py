@@ -17,6 +17,7 @@ urlpatterns = [
     path('request-user-token',
          NaverOauthController.as_view({ 'post': 'requestUserToken' }),
          name='User Token 요청'),
-    #path('logout', KakaoOauthController.as_view({'post': 'dropRedisTokenForLogout'}),
-     #   name='drop-redis_service-token-for-logout'),
+    path('request-withdraw-url',
+         NaverOauthController.as_view({'post': 'requestNaverWithdrawLink'}),
+         name='Naver 연결 끊기 요청'),
 ]

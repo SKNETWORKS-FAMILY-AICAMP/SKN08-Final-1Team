@@ -1,16 +1,10 @@
 from django.db import models
 
-from interview.entity.interview import Interview
-
-
 class InterviewQuestion(models.Model):
-    id = models.AutoField(primary_key=True)
-    question = models.CharField(max_length=255)
-    interview_id = models.ForeignKey(Interview, on_delete=models.CASCADE, db_column='interview_id')
-
-    def __str__(self):
-        return f"question : {self.question}"
+    interview = models.ForeignKey("Interview", on_delete=models.CASCADE, related_name="questions")
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'interview_question'
+        db_table = 'interview_question_data'
         app_label = 'interview'

@@ -1,113 +1,162 @@
 import * as axiosUtility from "../../utility/axiosInstance";
-import { AxiosResponse } from "axios"
-import { useAiInterviewStore } from "./aiInterviewStore"
+import { AxiosResponse } from "axios";
+import { useAiInterviewStore } from "./aiInterviewStore";
 
 export const aiInterviewActions = {
-    
-    // async requestGetQuestionListToDjango(sessionId: number): Promise<AxiosResponse> {
-    //     const { djangoAxiosInst } = axiosUtility.createAxiosInstances();
+  async requestCreateInterviewToDjango(payload: {
+    userToken: number,
+    jobCategory: string,
+    experienceLevel: string
+  }): Promise<any> {
+    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
 
-    //     try {
-    //         const res: AxiosResponse = await djangoAxiosInst.post('/interview/get-session', sessionId)
-    //         return res.data
-    //     } catch (err) {
-    //         console.error('requestGetQuestionListToDjango() -> error:', err)
-    //         throw err
-    //     }        
-    // },
-    async requestFirstQuestionToDjango(questionId: number): Promise<AxiosResponse> {
-        const { djangoAxiosInst } = axiosUtility.createAxiosInstances();
-
-        try {
-            const res: AxiosResponse = await djangoAxiosInst.post('/interview/get-first-question', questionId)
-            return res.data
-        } catch (err) {
-            console.error('requestFirstQuestionToDjango() -> error:', err)
-            throw err
-        }        
-    },
-
-    async requestInferNextQuestionToFastAPI(payload: { answer: string, nextIntent: string }): Promise<string> {
-        const { fastapiAxiosInst } = axiosUtility.createAxiosInstances();
-        // console.log("payload:", payload)
-        const { answer, nextIntent } = payload
-        
-        try {
-            // console.log('requestInferNextQuestionToFastAPI()')
-            // console.log("userInput:", answer)
-            const command = 7
-
-            const response = await fastapiAxiosInst.post(
-                '/request-ai-command', { command, "data":[answer, nextIntent] })
-            return response.data
-        } catch (error) {
-            console.log('requestInferToFastAPI() 중 문제 발생:', error)
-            throw error
+    try {
+      const res: AxiosResponse = await djangoAxiosInstance.post(
+        "/interview/create",
+        {
+          payload
         }
-    },
-    async requestInferScoreResultToFastAPI(payload: {interviewResult: any[]}): Promise<string>{
-        const { fastapiAxiosInst } = axiosUtility.createAxiosInstances();
-        const interviewResult = payload.interviewResult
-        try{
-            const command = 8
+      );
+      return res.data;
+    } catch (err) {
+      console.error("requestCreateInterviewToDjango() -> error:", err);
+      throw err;
+    }
+  },
 
-            const response = await fastapiAxiosInst.post(
-                '/request-ai-command', { command, "data": interviewResult })
-            return response.data
-        }catch (error) {
-            console.log('requestInferScoreResultToFastAPI() 중 문제 발생:', error)
-            throw error
+  async requestListInterviewToDjango(
+    userToken: string,
+    page: number = 1,
+    perPage: number = 10
+  ): Promise<any> {
+    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
+
+    try {
+      const res: AxiosResponse = await djangoAxiosInstance.post(
+        "/interview/list",
+        { userToken, page, perPage }
+      );
+      return res.data;
+    } catch (err) {
+      console.error("requestListInterviewToDjango() → error:", err);
+      throw err;
+    }
+  },
+
+  async requestRemoveInterviewToDjango(payload: {
+    userToken: string,
+    interviewId: number
+  }): Promise<any> {
+    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
+
+    try {
+      const res: AxiosResponse = await djangoAxiosInstance.post(
+        "/interview/remove",
+        {
+          payload
         }
-    },
-    async requestInferedResultToFastAPI(): Promise<string> {
-        const { fastapiAxiosInst } = axiosUtility.createAxiosInstances();
-        try {
-            // console.log('requestInferedResultToFastAPI()')
+      );
+      return res.data;
+    } catch (error) {
+      console.error("requestRemoveInterviewToDjango() → error:", error);
+      throw error;
+    }
+  },
 
-            let response: AxiosResponse<any>;
-            const maxAttempts = 500; // 최대 시도 횟수
-            const delay = 10000; // 각 시도 사이의 지연시간 (ms)
-            
-            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                response = await fastapiAxiosInst.get('/polyglot-result');
+  async requestCreateAnswerToDjango(payload: {
+    userToken: string;
+    interviewId: number;
+    questionId: number;
+    answerText: string;
+  }): Promise<any> {
+    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
+  
+    try {
+      const res: AxiosResponse = await djangoAxiosInstance.post(
+        "/interview/create-answer",
+        payload
+      );
+  
+      return res.data;
+    } catch (error) {
+      console.error("requestCreateAnswerToDjango() → error:", error);
+      throw error;
+    }
+  },
+  
 
-                if (response.data && response.data.nextQuestion) {
-                    // console.log('response.data', response.data);
-                    return response.data;
-                }
-                if (response.data && response.data.resultList){
-                    return response.data;
-                }
+  async requestGetScoreResultListToDjango(payload: {
+    accountId: string;
+  }): Promise<string> {
+    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
+    try {
+      const res: AxiosResponse = await djangoAxiosInstance.post(
+        "/interview/get-interview-result",
+        payload
+      );
+      return res.data.interviewResultList;
+    } catch (error) {
+      console.log("requestGetScoreResultListToDjango() 중 문제 발생:", error);
+      throw error;
+    }
+  },
 
-                console.log(`Attempt ${attempt} failed. Retrying in ${delay}ms...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
+  // ✅ FastAPI 관련 함수들은 그대로 유지해도 문제 없음
+  async requestInferNextQuestionToFastAPI(payload: {
+    answer: string;
+    nextIntent: string;
+  }): Promise<string> {
+    const { fastapiAxiosInst } = axiosUtility.createAxiosInstances();
+    const { answer, nextIntent } = payload;
+    try {
+      const command = 7;
+      const response = await fastapiAxiosInst.post("/request-ai-command", {
+        command,
+        data: [answer, nextIntent],
+      });
+      return response.data;
+    } catch (error) {
+      console.log("requestInferToFastAPI() 중 문제 발생:", error);
+      throw error;
+    }
+  },
 
-            throw new Error('결과를 가져오는 데 실패했습니다.');
-        } catch (error) {
-            console.log('requestInferedResultToFastAPI() 중 문제 발생:', error)
-            throw error
+  async requestInferScoreResultToFastAPI(payload: {
+    interviewResult: any[];
+  }): Promise<string> {
+    const { fastapiAxiosInst } = axiosUtility.createAxiosInstances();
+    const interviewResult = payload.interviewResult;
+    try {
+      const command = 8;
+      const response = await fastapiAxiosInst.post("/request-ai-command", {
+        command,
+        data: interviewResult,
+      });
+      return response.data;
+    } catch (error) {
+      console.log("requestInferScoreResultToFastAPI() 중 문제 발생:", error);
+      throw error;
+    }
+  },
+
+  async requestInferedResultToFastAPI(): Promise<string> {
+    const { fastapiAxiosInst } = axiosUtility.createAxiosInstances();
+    try {
+      let response: AxiosResponse<any>;
+      const maxAttempts = 500;
+      const delay = 10000;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        response = await fastapiAxiosInst.get("/polyglot-result");
+        if (response.data?.nextQuestion || response.data?.resultList) {
+          return response.data;
         }
-    },
-    async requestSaveInterviewResultToDjango(payload: { scoreResultList: [], accountId: string }): Promise<string>{
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
-        try{
-            const res: AxiosResponse = await djangoAxiosInst.post('/interview_result/save-interview-result', payload)
-            return res.data
-        } catch(error){
-            console.log('requestSaveInterviewResultToDjango() 중 문제 발생:', error)
-            throw error
-        }
-    },
-    async requestGetScoreResultListToDjango(payload: { accountId: string }): Promise<string>{
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
-        try{
-            const res: AxiosResponse = await djangoAxiosInst.post('/interview_result/get-interview-result', payload)
-            return res.data.interviewResultList
-
-        }catch(error){
-            console.log('requestGetScoreResultListToDjango() 중 문제 발생:', error)
-            throw error
-        }
-    },
+        console.log(`Attempt ${attempt} failed. Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+      throw new Error("결과를 가져오는 데 실패했습니다.");
+    } catch (error) {
+      console.log("requestInferedResultToFastAPI() 중 문제 발생:", error);
+      throw error;
+    }
+  },
 };

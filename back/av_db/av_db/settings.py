@@ -57,10 +57,13 @@ INSTALLED_APPS = [
     'orders',
     'marketing',
     'interview',
-    'interview_result',
+    #'interview_result',
+    'interview_question_data',
     'authentication',
     'github_authentication',
-#    'github_action_monitor',
+    'blog_post',
+    'excel_basic',
+    #    'github_action_monitor',
 ]
 
 MIDDLEWARE = [
@@ -127,7 +130,8 @@ NAVER ={
     'CLIENT_SECRET': os.getenv("NAVER_CLIENT_SECRET"),
     'REDIRECT_URI': os.getenv('NAVER_REDIRECT_URI'),
     'TOKEN_REQUEST_URI': os.getenv('NAVER_TOKEN_REQUEST_URI'),
-    'USER_INFO_REQUEST_URI': os.getenv('NAVER_USERINFO_REQUEST_URI'),
+    'USER_INFO_REQUEST_URI': os.getenv('NAVER_USER_INFO_REQUEST_URI'),
+    'WITHDRAW_URL': os.getenv('NAVER_WITHDRAW_URL'),
 }
 
 GITHUB = {

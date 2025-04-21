@@ -42,7 +42,7 @@ class ReviewServiceImpl(ReviewService):
         return maxId + 1
 
     def getReviewByReviewId(self, reviewId):
-        review = self.__reviewRepository.findreview(reviewId)
+        review = self.__reviewRepository.findReview(reviewId)
         return review
 
     def getQuestionByQuestionId(self, questionId):

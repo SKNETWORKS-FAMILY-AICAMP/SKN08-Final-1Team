@@ -31,8 +31,11 @@ urlpatterns = [
     path('marketing/',include('marketing.urls')),
     path('management/',include('management.urls')),
     path('interview/', include('interview.urls')),
-    path('interview_result/', include('interview_result.urls')),
+    #path('interview_result/', include('interview_result.urls')),
+    path('interview_question_data/', include('interview_question_data.urls')),
     path('authentication/', include('authentication.urls')),
     path('github-oauth/', include('github_authentication.urls')),
 #    path("github-action-monitor/", include('github_action_monitor.urls')),
+    path("blog-post/", include('blog_post.urls')),
+    path("excel-basic/", include('excel_basic.urls')),
 ]

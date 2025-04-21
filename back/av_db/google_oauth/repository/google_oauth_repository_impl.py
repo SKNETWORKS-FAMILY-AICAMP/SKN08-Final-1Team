@@ -76,6 +76,10 @@ class GoogleOauthRepositoryImpl(GoogleOauthRepository):
 
         # 응답 확인
         if response.status_code == 200:
-            return response.json()
+            return {"message": "구글 연결 해제 성공"}
         else:
-            return response.text  # 에러 메시지 반환
+            try:
+                return {"error": response.json()}
+            except Exception:
+                return {"error": response.text}
+

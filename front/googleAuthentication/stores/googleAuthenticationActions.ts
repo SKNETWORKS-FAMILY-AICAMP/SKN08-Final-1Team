@@ -26,7 +26,7 @@ export const googleAuthenticationAction = {
       );
       console.log("구글 탈퇴 응답:", res.data);
 
-      if (res.data && res.data.url && res.data.url.id) {
+      if (res.data && res.data.message === "구글 연결 해제 성공") {
         alert("구글 계정 탈퇴가 완료되었습니다.");
         window.location.href = "/"; // 탈퇴 후 홈으로 이동
       } else {

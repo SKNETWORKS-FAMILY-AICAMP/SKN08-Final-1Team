@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
 from account_profile.entity.account_profile import AccountProfile
+from account_profile.entity.admin_profile import AdminProfile
 from account_profile.repository.account_profile_repository import AccountProfileRepository
 
 
@@ -50,6 +51,18 @@ class AccountProfileRepositoryImpl(AccountProfileRepository):
         print(f"accountProfile 생성 성공: {gender}, {birthyear}, {age_range}")
 
         return accountProfile
+
+    def saveAdmin(self, account, email):
+        print("다음으로 여기")
+
+        adminProfile = AdminProfile.objects.create(
+            account=account,
+            email=email
+        )
+        print(f"accountProfile 생성 성공: {email}")
+
+        return adminProfile
+
 
     def findByAccount(self, account): # 객체 하나로 전체 정보 가져오기
         try:
