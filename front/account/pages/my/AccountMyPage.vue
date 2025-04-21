@@ -18,25 +18,20 @@
           <v-divider class="my-3"></v-divider>
           <v-row class="myinfo">
             <v-col cols="12">
-              <template v-if="gender && gender !== 'none'">
-                <v-icon>{{ gender === "male" ? "mdi-gender-male" : "mdi-gender-female" }}</v-icon>
-                <span class="ml-1">{{ gender === "male" ? "남성" : "여성" }}</span>
-                &nbsp;&nbsp;&nbsp;
-              </template>
-
-              <template v-if="birthyear !== 'none'">
-                <v-icon>mdi-calendar</v-icon>
-                <span class="ml-1">{{ birthyear }}</span>
-                &nbsp;&nbsp;&nbsp;
-              </template>
-
-              <template v-if="email !== 'none'">
-                <v-icon>mdi-email</v-icon>
-                <span class="subtitle-1">{{ email }}</span>
-              </template>
+              <v-icon>{{
+                gender === "male" ? "mdi-gender-male" : "mdi-gender-female"
+              }}</v-icon>
+              <span class="ml-1">{{
+                gender === "male" ? "남성" : "여성"
+              }}</span>
+              &nbsp;&nbsp;&nbsp;
+              <v-icon>mdi-calendar</v-icon>
+              <span class="ml-1">{{ birthyear }}</span>
+              &nbsp;&nbsp;&nbsp;
+              <v-icon>mdi-email</v-icon>
+              <span class="subtitle-1">{{ email }}</span>
             </v-col>
           </v-row>
-
 
           <v-row justify="center">
             <v-col cols="6">

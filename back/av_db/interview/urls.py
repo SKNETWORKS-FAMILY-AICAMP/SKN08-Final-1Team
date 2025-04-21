@@ -4,13 +4,20 @@ from rest_framework.routers import DefaultRouter
 from interview.controller.interview_controller import InterviewController
 
 router = DefaultRouter()
-router.register(r'interview', InterviewController, basename='interview')
+router.register(r"interview", InterviewController, basename='interview')
+
 urlpatterns = [
     path('', include(router.urls)),
-    path('insert-session', InterviewController.as_view({'post': 'insertSession'}), name='insert-session'),
-    path('insert-first-question', InterviewController.as_view({'post': 'insertFirstQuestion'}), name='insert-first-question'),
-    path('insert-tech-question', InterviewController.as_view({'post': 'insertTechQuestion'}), name='insert-tech-question'),
-    path('get-session', InterviewController.as_view({'post': 'getSession'}), name='get-session'),
-    path('get-first-question', InterviewController.as_view({'post': 'getFirstQuestion'}), name='get-first-question'),
-    path('get-tech-question', InterviewController.as_view({'post': 'getTechQuestion'}), name='get-tech-question'),
+    path('create',
+         InterviewController.as_view({ 'post': 'requestCreateInterview' }),
+         name='인터뷰 질문 생성 및 추가'),
+    path('list',
+         InterviewController.as_view({ 'post': 'requestListInterview' }),
+         name='인터뷰 리스트'),
+    path('remove',
+         InterviewController.as_view({ 'post': 'requestRemoveInterview' }),
+         name='인터뷰 제거'),
+    path('user-answer',
+         InterviewController.as_view({ 'post': 'requestCreateAnswer' }),
+         name='인터뷰 사용자 답변 등록'),
 ]

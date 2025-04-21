@@ -1,9 +1,7 @@
-import random
-
+from django.core.paginator import Paginator, EmptyPage
+from django.db import models
 from interview.entity.interview import Interview
-from interview.entity.interview_first_question import InterviewFirstQuestion
 from interview.entity.interview_question import InterviewQuestion
-from interview.entity.interview_tech_question import InterviewTechQuestion
 from interview.repository.interview_repository import InterviewRepository
 
 
@@ -13,47 +11,52 @@ class InterviewRepositoryImpl(InterviewRepository):
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-
         return cls.__instance
-
-    def getMaxId(self):
-        interview = Interview.objects.all()
-        interviewMaxId = len(interview)
-        return interviewMaxId
 
     @classmethod
     def getInstance(cls):
         if cls.__instance is None:
             cls.__instance = cls()
-
         return cls.__instance
 
-    def insertData(self, interviewId, questionList):
-        Interview.objects.get_or_create(interview_id=interviewId)
-        interview = Interview.objects.get(interview_id=interviewId)
-        for question in questionList:
-            InterviewQuestion.objects.create(question=question, interview_id=interview)
+    def save(self, interview) -> Interview:
+        """인터뷰 저장"""
+        interview.save()
+        return interview
 
-    def insertFirstQuestion(self, question):
-        InterviewFirstQuestion.objects.create(question=question)
+    def saveQuestion(self, interview_id: int, question: str) -> int | None:
+        try:
+            saved = InterviewQuestion.objects.create(
+                interview_id=interview_id,
+                content=question
+            )
+            return saved.id
+        except Exception as e:
+            print(f"❌ 질문 저장 실패: {e}")
+            return None
 
-    def insertTechQuestion(self, question, job):
-        InterviewTechQuestion.objects.create(question=question, job=job)
+    def findById(self, interviewId: int) -> Interview:
+        """인터뷰 ID로 인터뷰 찾기"""
+        try:
+            return Interview.objects.get(id=interviewId)
+        except Interview.DoesNotExist:
+            return None
 
-    def getData(self, sessionId):
-        interview = Interview.objects.get(interview_id=sessionId)
-        questions = (InterviewQuestion.objects.filter(interview_id=interview).order_by('id').values_list('question'))
-        questionList = []
-        for question in questions:
-            questionList.append(question[0])
-        return questionList
+    def findInterviewByAccount(self, account, page: int, pageSize: int) -> models.QuerySet:
+        """특정 계정에 해당하는 인터뷰 목록 조회 (페이지네이션 적용)"""
+        interviews = Interview.objects.filter(account=account).order_by("-created_at")
+        paginator = Paginator(interviews, pageSize)
+        try:
+            page = paginator.page(page)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+        return page
 
-    def getFirstQuestion(self, questionId):
-        interviewFirstQuestion = InterviewFirstQuestion.objects.get(id=questionId)
-        firstQuestion = interviewFirstQuestion.question
-        return firstQuestion
-
-    def getTechQuestion(self, job):
-        interviewTech = InterviewTechQuestion.objects.filter(job=job)
-        interviewTechQuestion = random.choice(interviewTech) if interviewTech else None
-        return interviewTechQuestion.question if interviewTechQuestion else None
+    def deleteById(self, interviewId: int) -> bool:
+        """인터뷰 ID로 인터뷰 삭제"""
+        try:
+            interview = Interview.objects.get(id=interviewId)
+            interview.delete()
+            return True
+        except Interview.DoesNotExist:
+            return False

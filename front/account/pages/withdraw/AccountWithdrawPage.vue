@@ -1,6 +1,8 @@
+<!-- src/views/WithdrawalPage.vue -->
 <template>
   <v-container>
-    <v-form class="reason-section">
+    <!-- 탈퇴 사유 선택 -->
+    <v-form v-if="step === 'reason'" class="reason-section">
       <h3>서비스 품질 향상을 위해 탈퇴 사유를 선택해주세요.</h3>
       <v-radio-group class="radio-group-section" v-model="selectedReason">
         <v-radio
@@ -8,19 +10,47 @@
           :key="index"
           :label="reason.label"
           :value="reason.value"
-        ></v-radio>
+        />
       </v-radio-group>
-      <v-btn :disabled="!isButtonEnabled" @click="submitWithdrawal">
-        탈퇴 신청
+      <v-btn :disabled="!isButtonEnabled" @click="goToAgreement">
+        다음
       </v-btn>
     </v-form>
+
+    <!-- 탈퇴 안내 및 동의 -->
+<div v-else-if="step === 'agreement'" class="agreement-section">
+  <h2 class="agreement-title">Jobstick 회원 탈퇴 안내 및 동의</h2>
+  <v-card class="agreement-card mt-4 pa-4">
+    <p>
+      Jobstick 회원 탈퇴 시, 아래 항목은 관계법령에 따라 일정 기간 동안 안전하게 보관됩니다.<br />
+      보존된 정보는 법령에 따른 목적 외에는 절대 사용되지 않습니다.
+    </p>
+    <ul class="mt-2">
+      <li>계약 및 결제 관련 기록: 5년 (전자상거래법)</li>
+      <li>전자금융 거래 기록: 5년 (전자금융거래법)</li>
+      <li>소비자 불만 및 분쟁 처리 기록: 3년 (전자상거래법)</li>
+      <li>웹사이트 접속 기록: 3개월 (통신비밀보호법)</li>
+    </ul>
+    <p class="mt-3">
+      위 내용을 확인하였으며 Jobstick 회원 탈퇴를 계속 진행하시겠습니까?
+    </p>
+  </v-card>
+
+  <div class="agreement-button-group">
+    <v-btn class="mr-4" color="grey" @click="goBack">이전</v-btn>
+    <v-btn color="red" @click="proceedWithdrawal">탈퇴 동의</v-btn>
+  </div>
+</div>
+
+
+    <!-- 완료 다이얼로그 -->
     <v-dialog v-model="dialog" max-width="500">
       <v-card>
         <v-card-title class="headline">알림</v-card-title>
         <v-card-text>회원 탈퇴가 완료되었습니다.</v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="green darken-1" text @click="closeDialog">확인</v-btn>
+          <v-spacer />
+          <v-btn color="primary" text @click="closeDialog">확인</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -28,78 +58,68 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useAccountStore } from "../../../account/stores/accountStore";
-import { useKakaoAuthenticationStore } from "../../../kakaoAuthentication/stores/kakaoAuthenticationStore";
-import { useNaverAuthenticationStore } from "../../../naverAuthentication/stores/naverAuthenticationStore";
-import { useGoogleAuthenticationStore } from "../../../googleAuthentication/stores/googleAuthenticationStore";
-import { useAuthenticationStore } from "../../../authentication/stores/authenticationStore";
-import { useRouter } from "vue-router";
-import { naverAuthenticationState } from "~/naverAuthentication/stores/naverAuthenticationState";
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
-// 탈퇴 사유 리스트
+import { useAccountStore } from '@/account/stores/accountStore'
+import { useKakaoAuthenticationStore } from '@/kakaoAuthentication/stores/kakaoAuthenticationStore'
+import { useNaverAuthenticationStore } from '@/naverAuthentication/stores/naverAuthenticationStore'
+import { useGoogleAuthenticationStore } from '@/googleAuthentication/stores/googleAuthenticationStore'
+import { useAuthenticationStore } from '@/authentication/stores/authenticationStore'
+
+const step = ref('reason')
+const selectedReason = ref(null)
+const isButtonEnabled = computed(() => selectedReason.value !== null)
+const dialog = ref(false)
+const router = useRouter()
+
+const accountStore = useAccountStore()
+const kakaoStore = useKakaoAuthenticationStore()
+const naverStore = useNaverAuthenticationStore()
+const googleStore = useGoogleAuthenticationStore()
+const authStore = useAuthenticationStore()
+
 const reasons = ref([
-  { label: "서비스 품질 불만족", value: "SERVICE_DISSATISFACTION" },
-  { label: "사용 빈도 낮음", value: "LOW_USAGE" },
-  { label: "다른 서비스 사용", value: "OTHER_SERVICE" },
-  { label: "개인정보 보호 우려", value: "PRIVACY_CONCERN" },
-  { label: "기타", value: "OTHER" },
-]);
+  { label: '서비스 품질 불만족', value: 'SERVICE_DISSATISFACTION' },
+  { label: '사용 빈도 낮음', value: 'LOW_USAGE' },
+  { label: '다른 서비스 사용', value: 'OTHER_SERVICE' },
+  { label: '개인정보 보호 우려', value: 'PRIVACY_CONCERN' },
+  { label: '기타', value: 'OTHER' }
+])
 
-// 선택된 탈퇴 사유와 다이얼로그 상태
-const selectedReason = ref(null);
-const dialog = ref(false);
+const goToAgreement = () => {
+  step.value = 'agreement'
+}
 
-// store와 router 사용 설정
-const accountStore = useAccountStore();
-const kakaoAuthenticationStore = useKakaoAuthenticationStore();
-const naverAuthenticationStore = useNaverAuthenticationStore();
-const googleAuthenticationStore = useGoogleAuthenticationStore();
-const authentication = useAuthenticationStore();
-const router = useRouter();
+const goBack = () => {
+  step.value = 'reason'
+}
 
-// 버튼 활성화 여부 계산
-const isButtonEnabled = computed(() => selectedReason.value !== null);
+const proceedWithdrawal = () => {
+  const reason = selectedReason.value ?? ''
+  const loginType = localStorage.getItem('loginType')
 
-// 탈퇴 신청 처리
-const submitWithdrawal = () => {
-  const reasonString = selectedReason.value ? String(selectedReason.value) : "";
-  const loginType = localStorage.getItem('loginType'); // 현재 로그인 타입 가져오기
+  if (loginType === 'KAKAO') kakaoStore.requestKakaoWithdrawToDjango()
+  else if (loginType === 'GOOGLE') googleStore.requestGoogleWithdrawToDjango()
+  else if (loginType === 'NAVER') naverStore.requestNaverWithdrawToDjango()
 
-  if (loginType === 'kakao') {
-    kakaoAuthenticationStore.requestKakaoWithdrawToDjango();
-  } else if (loginType === 'google') {
-    googleAuthenticationStore.requestGoogleWithdrawToDjango();
-  } else if (loginType === 'naver') {
-    naverAuthenticationStore.requestNaverWithdrawToDjango?.(); 
-    // naver 탈퇴 함수가 있을 경우에만 호출
-  }
+  accountStore.requestWithdrawalToDjango({ reason })
 
-  // 공통 탈퇴 요청 (우리 서버 DB에서 탈퇴)
-  accountStore.requestWithdrawalToDjango({ reason: reasonString });
+  // 로컬스토리지 및 인증 초기화
+  localStorage.removeItem('userToken')
+  localStorage.removeItem('loginType')
+  authStore.isAuthenticated = false
+  kakaoStore.isAuthenticated = false
+  naverStore.isAuthenticated = false
+  googleStore.isAuthenticated = false
 
-  // 로컬 저장소 정리
-  localStorage.removeItem("userToken");
-  localStorage.removeItem("loginType");
+  dialog.value = true
+}
 
-  // 완료 다이얼로그 띄우기
-  dialog.value = true;
-};
-
-
-// 다이얼로그 닫기 처리 및 로그아웃
 const closeDialog = () => {
-  dialog.value = false;
-  //kakaoAuthenticationStore.requestLogout();
-  //naverAuthenticationStore.requestLogout();
-  authentication.isAuthenticated = false;
-  naverAuthenticationStore.isAuthenticated = false;
-  kakaoAuthenticationStore.isAuthenticated = false;
-  googleAuthenticationStore.isAuthenticated = false;
-  localStorage.removeItem("userToken");
-  localStorage.removeItem("loginType");
-  router.push("/");
-};
+  dialog.value = false
+  router.push('/')
+}
 </script>
 
 <style scoped>
@@ -110,5 +130,35 @@ const closeDialog = () => {
 .radio-group-section {
   margin-top: 30px;
   margin-bottom: 10px;
+}
+
+ul {
+  margin-left: 1rem;
+  list-style-type: disc;
+}
+
+/* 중앙 정렬 스타일 추가 */
+.agreement-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+}
+
+.agreement-title {
+  margin-bottom: 20px;
+}
+
+.agreement-card {
+  max-width: 600px;
+  width: 100%;
+}
+
+.agreement-button-group {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
 }
 </style>

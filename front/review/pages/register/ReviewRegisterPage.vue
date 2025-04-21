@@ -1,11 +1,14 @@
 <template>
   <v-container style="maxwidth: 50%; margin-top: 10vh">
-    <v-form ref="form" v-model="valid">
+    <v-container v-if="start" align="center">
+      <v-btn @click="createForm">설문 조사 제작하기</v-btn>
+    </v-container>
+    <v-form v-if="formCreated" ref="form" v-model="valid">
       <v-card-title>
         <form v-if="showTitleDescription" @submit.prevent>
           <v-text-field
             class="headline"
-            label="제목을 작성하세요."
+            label="설문지 이름을 작성하세요."
             v-model="reviewTitle"
             @keyup.enter="disableEnter"
             :rules="[
@@ -16,7 +19,7 @@
           ></v-text-field>
           <v-text-field
             class="headline"
-            label="내용을 작성하세요."
+            label="설문지에 대한 설명을 작성하세요."
             v-model="reviewDescription"
             @keyup.enter="disableEnter"
             :rules="[(v) => (v && v.trim() !== '') || '설명은 필수 항목입니다']"
@@ -246,10 +249,11 @@ const reviewStore = useReviewStore();
 const router = useRouter();
 
 // Reactive state variables
+const start = ref(true);
 const showTitleDescription = ref(true);
 const titleAndDescriptionCreated = ref(false);
 const readyToCreateQuestionTitle = ref(true);
-const formCreated = ref(true);
+const formCreated = ref(false);
 const reviewId = ref(null);
 const questionId = ref(null);
 const selectionId = ref(null);
@@ -267,7 +271,6 @@ const isFormDirty = ref(false);
 const randomString = ref("");
 const uploadedImages = ref([]);
 const uploadedImage = ref(null);
-const valid = ref(false);
 
 // Methods
 const createForm = async () => {

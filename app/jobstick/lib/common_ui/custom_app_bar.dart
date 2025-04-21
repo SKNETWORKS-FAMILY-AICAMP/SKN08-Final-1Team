@@ -8,6 +8,7 @@ import 'package:jobstick/google_authentication/presentation/providers/google_aut
 import 'package:jobstick/authentication/auth_module.dart';
 import 'package:provider/provider.dart';
 
+import '../blog_post/blog_post_module.dart';
 import '../simple_chat/simple_chat_module.dart';
 import 'app_bar_action.dart';
 
@@ -17,14 +18,19 @@ class CustomAppBar extends StatelessWidget {
 
   final Widget body;
   final String title;
+  final bool showBackButton;
 
   CustomAppBar({
     required this.body,
-    this.title = 'Home'
+    this.title = 'Home',
+    this.showBackButton = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    print("CustomAppBar apiUrl: ${apiUrl}");
+    print("CustomAppBar apiKey: ${apiKey}");
+
     return Column(
       children: [
         Consumer2<KakaoAuthProvider, GoogleAuthProvider>(
@@ -32,15 +38,34 @@ class CustomAppBar extends StatelessWidget {
             final bool isLoggedIn =
                 kakaoProvider.isLoggedIn || googleProvider.isLoggedIn;
             return AppBar(
-              title: SizedBox(
-                height: 50,
-                child: Image.asset(
-                  'images/logo2.png',
-                  fit: BoxFit.fitHeight,
+              automaticallyImplyLeading: showBackButton,
+              title: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                },
+                child: SizedBox(
+                  height: 50,
+                  child: Image.asset(
+                    'images/logo2.png',
+                    fit: BoxFit.fitHeight,
+                  ),
                 ),
               ),
+
               backgroundColor: Color.fromARGB(255, 32, 100, 227),
               actions: [
+                AppBarAction(
+                  icon: Icons.article,
+                  tooltip: 'Blog Posts',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BlogPostModule.provideBlogPostListPage(),
+                      ),
+                    );
+                  },
+                ),
                 AppBarAction(
                   icon: Icons.list_alt,
                   tooltip: '게시물 리스트',

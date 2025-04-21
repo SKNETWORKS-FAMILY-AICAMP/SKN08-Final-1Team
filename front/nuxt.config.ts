@@ -3,7 +3,7 @@ import { defineNuxtConfig } from "nuxt/config";
 export default defineNuxtConfig({
   app: {
     head: {
-      // title: 'AIM',
+      // title: 'JOBSTICK',
       titleTemplate: "%s JOBSTICK",
       meta: [
         // 페이지 인코딩 설정
@@ -87,8 +87,12 @@ export default defineNuxtConfig({
     "./githubAuthentication/nuxt.config.ts",
     "./authentication/nuxt.config.ts",
   ],
-  css: ["vuetify/styles", "@mdi/font/css/materialdesignicons.min.css"],
-
+  css: [
+    "vuetify/styles",
+    "@mdi/font/css/materialdesignicons.min.css",
+    "@/assets/css/global.css", // ✅ 너가 만든 global.css 추가
+  ],
+  
   build: {
     transpile: ["vuetify"], // Vuetify를 빌드 시 트랜스파일링
   },

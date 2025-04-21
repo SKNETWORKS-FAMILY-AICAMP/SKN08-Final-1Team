@@ -6,7 +6,96 @@
       height="100%"
       class="control-margin"
     >
-      <br /><br /><br />
+      <!-- 기술 선택 부분: 필터가 열리고 닫히는 부분 -->
+      <v-slide-y-transition>
+        <v-row class="filter-tags-container">
+          <v-col cols="12">
+            <!-- 기술 -->
+            <v-row class="align-center mb-4">
+              <v-col cols="1" class="filter-group-title">
+                <strong>기술</strong>
+              </v-col>
+              <v-col cols="11">
+                <v-chip-group
+                  v-if="!resetChips"
+                  v-model="selectedKeyword"
+                  column
+                >
+                  <!--<v-btn   // 초기화 버튼 일단 주석처리함
+                    @click="clearSelectedKeywords"
+                    class="reset-chip"
+                    style="
+                      background-color: white;
+                      border-radius: 20px;
+                      height: 33px;
+                      margin-right: 10px;
+                      margin-top: 3px;
+                      box-shadow: none;
+                      border: 1px solid lightgray;
+                    "
+                  > 
+                    <v-icon left>mdi-refresh</v-icon>
+                    초기화
+                  </v-btn> -->
+                  <v-chip
+                    v-for="(keyword, index) in keywords"
+                    :key="index"
+                    :value="keyword"
+                    :class="selectedKeyword === keyword ? 'selected-chip' : 'unselected-chip'"
+                    class="keyword-chip"
+                    clickable
+                  >
+                    {{ keyword }}
+                  </v-chip>
+                </v-chip-group>
+              </v-col>
+            </v-row>
+            <!-- 경력 선택 부분: 기술과 같은 열에 배치 -->
+            <v-row class="align-center mb-4">
+              <v-col cols="1" class="filter-group-title">
+                <strong>경력</strong>
+              </v-col>
+              <v-col cols="11">
+                <v-chip-group
+                  v-if="!resetCareer"
+                  v-model="selectedCareer"
+                  class="career-select-group"
+                  column 
+                >
+                  <!--<v-btn  
+                    @click="clearSelectedCareer"
+                    class="reset-career"
+                    style="
+                      background-color: white;
+                      border-radius: 20px;
+                      height: 33px;
+                      margin-right: 10px;
+                      margin-top: 3px;
+                      box-shadow: none;
+                      border: 1px solid lightgray;
+                    "
+                  >
+                    <v-icon left>mdi-refresh</v-icon>
+                    초기화
+                  </v-btn> -->
+                  <v-chip
+                    v-for="(career, index) in careers"
+                    :key="index"
+                    :value="career"
+                    :class="selectedCareer === career ? 'selected-chip' : 'unselected-chip'"
+                    class="career-chip"
+                    clickable
+                  >
+                    {{ career }}
+                  </v-chip>
+                </v-chip-group>
+              </v-col>
+            </v-row>
+            <!-- 카테고리 선택 제목과 카테고리 필터를 같은 열에 배치 -->
+          </v-col>
+        </v-row>
+      </v-slide-y-transition>
+
       <h2>안녕하십니까? AI 모의 면접 서비스입니다.</h2>
       <br />
       <v-container class="draw-line" align="start">
@@ -14,29 +103,28 @@
           ><strong>※ 사전 공지 ※</strong></v-card-title
         ><br />
         <li class="li">
-          본 면접은 특정 기업 및 직무에 맞추어진 면접이 아닌
-          <strong>인성 면접</strong>임을 알려드립니다.
+          본 면접은 특정 기업 및 직무에 맞추어진 면접인인
+          <strong>TECH-INTERVIEW</strong>임을 알려드립니다.
         </li>
-        <br />
-        <li class="li">총 <strong>5개</strong>의 질문이 제공됩니다.</li>
-        <br />
+
         <li class="li">
-          면접 질문 당 답변 제한 시간은 <strong>1분 30초</strong>입니다. 시간
-          내에 작성 부탁드립니다.
+          모의면접에는 <strong>마이크, 카메라</strong>의 사용이 필요합니다.
         </li>
         <br /> </v-container
       ><br />
       <v-card-text
         ><strong
-          >면접 서비스를 시작하시려면 아래 버튼을 눌러주세요.</strong
-        ></v-card-text
-      >
-      <v-btn @click="startInterview" color="primary">START</v-btn>
+          >시작에 앞서 체크리스트를 작성하여 주십시오.</strong
+        ></v-card-text>
+      <!-- 제출 버튼 -->
+      <v-btn @click="startQuestion" color="primary">제출하기</v-btn>
     </v-container>
+
+     <!-- 면접 진행 UI (생략 없이 유지) -->
     <v-container v-if="start" align="center">
       <div v-if="visible" class="interview-container">
         <v-icon>mdi-account-tie</v-icon><br />
-        <v-text v-html="startMessage"></v-text>
+        <div v-html="startMessage"></div>
       </div>
       <div v-if="!visible" class="interview-container">
         <v-icon>mdi-account-tie</v-icon>
@@ -71,30 +159,28 @@
       </div>
     </v-container>
 
-    <v-container v-if="start && !visible" class="input-area">
-      <textarea
-        v-model="userInput"
-        placeholder="메시지를 입력하세요..."
-        @keydown.enter.exact.prevent="handleEnterKey"
-        @keydown.shift.enter="handleShiftEnter"
-        @input="adjustTextareaHeight"
-        :disabled="finished || isLoading"
-        ref="messageInput"
-      ></textarea>
-      <button
-        class="send-button"
-        @click="sendMessage"
-        :disabled="finished || isLoading"
-      >
-        입력
-      </button>
+    <!-- 답변 입력 영역 -->
+    <v-container v-if="start && !visible" clas="input-area">
+      <div class="button-group">
+        <button class="send-button" @click="startSTT" :disabled="recognizing">
+          말하기
+        </button>
+
+        <button @click="speakCurrentMessage">🗣 AI 질문 듣기</button>
+      </div>
+
+      <v-btn color="primary" @click="onAnswerComplete">답변 완료</v-btn>
+
+      <div v-if="sttLog !== ''" class="stt-log">
+        <p><strong>STT 결과:</strong> {{ sttLog }}</p>
+      </div>
     </v-container>
   </main>
 </template>
 
 <script setup>
 import { ref, watch, computed, onMounted } from "vue";
-import { useAiInterviewStore } from "@/stores/aiInterviewStore"; // Pinia store import
+import { useAiInterviewStore } from "../../../aiInterview/stores/aiInterviewStore"; // Pinia store import
 import { useAccountStore } from "../../../account/stores/accountStore";
 import markdownIt from "markdown-it";
 import { useRouter } from "vue-router";
@@ -106,49 +192,89 @@ const accountStore = useAccountStore();
 const router = useRouter();
 
 // Component State
-const accountId = ref("");
-const start = ref(false);
-const finished = ref(false);
-const visible = ref(true);
-const userInput = ref("");
-const aiOutput = ref("");
+const accountId = ref(""); //로그인 확인
+const start = ref(false); //면접 시작
+const finished = ref(false); //면접 끝
+const visible = ref(true); //시작안내에서 면접 질문 표시 돌리기기
+const userInput = ref(""); //유저응답
+const currentAIMessage = ref(""); //ai응답
+const chatHistory = ref([{ type: "ai", content: "" }]); //대화 흐름저장
+const isLoading = ref(false); //로딩확인
+const sendCount = ref(0); //질문갯수 확인
+const maxMessages = 5; //최대질문 갯수 5개
+const aiResponseList = ref([]); //ai질문 데이터 저장
+const questionIndex = ref(0); //몇번쨰 질문인지 저장
+const intentList = ["대처 능력", "소통 능력", "프로젝트 경험", "자기 개발"]; //질문주제
+const intentIndex = ref(0); //몇번째 주제인지 저장
 const startMessage =
   "<h2>안녕하세요. AI 모의 면접 서비스입니다.</h2><br><strong><span>제한 시간 내에 답변 작성 부탁드립니다.</span><br><span>지금부터 면접을 시작하겠습니다.</span></strong>";
-const currentAIMessage = ref("");
-const chatHistory = ref([{ type: "ai", content: "" }]);
-const isLoading = ref(false);
-const sendCount = ref(0);
-const maxMessages = 5;
-const aiResponseList = ref([]);
-const questionIndex = ref(0);
-const intentList = ["대처 능력", "소통 능력", "프로젝트 경험", "자기 개발"];
-const intentIndex = ref(0);
+//면접시작 알림 메세지
+const selectedKeywords = ref([]);
 
+//기술 모음
+const keywords = ref([
+  "Backend",
+  "Frontend",
+  "App·Web",
+  "AI",
+  "Embeddeed",
+  "DevOps",
+]);
+const selectedKeyword = ref(""); // 기술 단일 선택 (중복선택X)
+
+//경력 모음
+const careers = ref(["신입", "3년 이하", "5년 이하", "10년 이하", "10년 이상"]);
+const selectedCareer = ref("");  // 경력 단일 선택 (중복선택X)
+
+//질문 문장단위 줄바꿈
 const formattedAIMessage = computed(() => {
   return currentAIMessage.value.replace(/([.?])/g, "$1<br>");
 });
 
-// Computed Properties
+// 질문개수 초과 여부
 const isCheckoutDisabled = computed(() => sendCount.value >= maxMessages);
 
-const timeLimit = 90;
-const remainingTime = ref(timeLimit);
-const timer = ref(null);
+const timeLimit = 90; //응답 시간제한
+const remainingTime = ref(timeLimit); //응답 후 남은 시간
+const timer = ref(null); //타이머
 
-// Watchers
+//음성인식
+const recognizing = ref(false); //음성인식 상태여부
+let recognition; //SpeechRecognition 인스턴스
+const sttLog = ref(""); //STT결과 저장
+
+//면접이 시작되는걸 감지
+//showStartMessage() 출력
 watch(start, (newVal) => {
   if (newVal === true) {
     showStartMessage();
   }
 });
 
+//2.5초 뒤에 안내문 닫고 질문 시작
+const showStartMessage = () => {
+  const synth = window.speechSynthesis;
+  const utterance = new SpeechSynthesisUtterance(
+    "안녕하세요. AI 모의 면접을 시작하겠습니다. 제한 시간 내에 답변 작성 부탁드립니다. 지금부터 면접을 시작하겠습니다."
+  );
+  utterance.lang = "KO-KR";
+
+  utterance.onend = () => {
+    visible.value = false;
+  };
+
+  synth.speak(utterance);
+};
+
+//false가 되면 getAIQuestions()를 실행
 watch(visible, (newVal) => {
   if (newVal === false) {
     getAIQuestions();
   }
 });
 
-// Lifecycle Hooks
+// usertoken을 확인하여 로그인 상태 확인
+// 체크리스트 작성하여 제출하면 sessionstorage확인 후 제거
 onMounted(async () => {
   const userToken = localStorage.getItem("userToken");
   if (userToken) {
@@ -157,8 +283,86 @@ onMounted(async () => {
     alert("로그인이 필요합니다.");
     router.push("/account/login");
   }
+
+  if (sessionStorage.getItem("startInterview") === "true") {
+    start.value = true;
+    sessionStorage.removeItem("startInterview");
+  }
 });
 
+//기술 초기화 클릭시 초기화
+function clearSelectedKeywords() {
+  if (selectedKeywords.value.length == 0);
+
+  selectedKeywords.value.splice(0, selectedKeywords.value.length);
+  resetChips.value = true;
+  selectedKeywords.value = [];
+  nextTick(() => {
+    selectedKeywords.value.splice(0, selectedKeywords.value.length);
+    resetChips.value = false;
+  });
+}
+
+//경력 초기화 클릭시 초기화
+function clearSelectedCareer() {
+  if (selectedCareers.value.length == 0);
+
+  selectedCareers.value.splice(0, selectedCareers.value.length);
+  resetCareer.value = true;
+  selectedCareers.value = [];
+  nextTick(() => {
+    selectedCareers.value.splice(0, selectedCareers.value.length);
+    resetCareer.value = false;
+  });
+}
+
+//음성인식
+onMounted(() => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("이 브라우저는 음성 인식을 지원하지 않습니다.");
+    return;
+  }
+
+  // ✅ 음성 인식 인스턴스 생성
+  recognition = new SpeechRecognition();
+  recognition.lang = "ko-KR";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    recognizing.value = true;
+    console.log("🎤 음성 인식 시작");
+  };
+
+  recognition.onend = () => {
+    recognizing.value = false;
+    console.log("🛑 음성 인식 종료");
+  };
+
+  recognition.onerror = (e) => {
+    console.error("🎙 음성 인식 오류", e);
+    recognizing.value = false;
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    console.log("🎙 인식된 음성:", transcript);
+
+    userInput.value += transcript;
+    sttLog.value = transcript;
+  };
+});
+
+const startSTT = () => {
+  if (recognition && !recognizing.value) {
+    recognition.start();
+  }
+};
+//여기까지
+
+//면접 시 타이머
 const startTimer = () => {
   clearInterval(timer.value);
   remainingTime.value = timeLimit;
@@ -174,48 +378,79 @@ const startTimer = () => {
   }, 1000);
 };
 
+//ai가 새로운 질문이 나오면 답변타이머 시작
 watch(currentAIMessage, () => {
   startTimer();
 });
 
+//타이머 정리
 onBeforeUnmount(() => {
   clearInterval(timer.value);
 });
 
-// Methods
-const startInterview = () => {
-  start.value = true;
+// AiInterviewQuestionPage.vue로 이동
+const startQuestion = () => {
+  if (!selectedKeyword.value ||
+      !selectedCareer.value
+   ) {
+    alert("기술과 경력을 모두 선택해 주세요.");
+    return;
+  }
+  //const KeywordText = selectedKeywords.value.join(",");
+  //const careerText = selectedCareers.value.join(",");
+
+  const message = `선택한 기술: ${selectedKeyword.value}\n선택된 경력: ${selectedCareer.value}`;
+
+  if (confirm(message)) {
+    start.value = true;
+  }
 };
 
+//버튼에 연결하여 다음으로 넘김
+const onAnswerComplete = async () => {
+  clearInterval(timer.value);
+  await sendMessage();
+};
+
+//질문
 const getAIQuestions = async () => {
   if (aiResponseList.value.length === 0) {
-    const questionId = Math.floor(Math.random() * 3061) + 1;
-    aiResponseList.value = await aiInterviewStore.requestFirstQuestionToDjango({
-      questionId: questionId,
-    });
+    const questionId = Math.floor(Math.random() * 200) + 1;
+
+    // ✅ 숫자만 넘기기
+    aiResponseList.value = await aiInterviewStore.requestFirstQuestionToDjango(
+      questionId
+    );
   }
+
   currentAIMessage.value =
     aiResponseList.value.firstQuestion ||
     "질문을 불러오는 데 실패하였습니다. 다시 시도해주세요.";
-  // intentIndex.value++;
-  chatHistory.value.push({ type: "ai", content: currentAIMessage.value });
 
-  const chunks = chunkText(currentAIMessage.value, 1);
-  streamText(chunks);
+  chatHistory.value.push({ type: "ai", content: currentAIMessage.value });
+  speak(currentAIMessage.value, () => {
+    const chunks = chunkText(currentAIMessage.value, 1);
+    streamText(chunks);
+    startTimer();
+  });
 };
 
+//질문을 마크다운 형태로 HTML로 변환 렌더링
 const renderMessageContent = (message) => {
   if (message.type !== "user") {
     return `<h2>${markdownIt().render(message.content)}</h2>`;
   }
 };
 
-const chunkText = (text, chunkSize) => {
-  const chunks = [];
-  for (let i = 0; i < text.length; i += chunkSize) {
-    chunks.push(text.substring(i, i + chunkSize));
-  }
-  return chunks;
+//TTS
+const speak = (text) => {
+  const synth = window.speechSynthesis;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "KO-KR";
+  utterance.rate = 0.9;
+  utterance.pitch = 1.1;
+  utterance.volume = 1;
+  synth.speak(utterance);
 };
 
 const streamText = async (chunks) => {
@@ -282,7 +517,7 @@ const sendMessage = async () => {
 
   setTimeout(async () => {
     if (aiResponseList.value.length === 0) {
-      const questionId = Math.floor(Math.random() * 3061) + 1;
+      const questionId = Math.floor(Math.random() * 200) + 1;
       aiResponseList.value =
         await aiInterviewStore.requestFirstQuestionToDjango({
           questionId: questionId,
@@ -373,6 +608,7 @@ const sendMessage = async () => {
             Math.random() * tempQuestionList.length
           );
           currentAIMessage.value = tempQuestionList[randomIndex];
+          speak(currentAIMessage.value);
         }
         if (nextIntent == "소통 능력") {
           const tempQuestionList = [
@@ -419,18 +655,13 @@ const sendMessage = async () => {
   }, 1000);
 };
 
-const showStartMessage = () => {
-  setTimeout(() => {
-    visible.value = false;
-  }, 2500);
-};
-
+//면접페이지에 들어오면 출력되는 제목
 useHead({
   title: `AI 모의면접 & 인성면접 | `,
   meta: [
     {
       name: "description",
-      content: "AI 모의면접, AI 인성면접 🎯AIM에서 확인해보세요.",
+      content: "AI 모의면접, AI 인성면접 🎯jobstcik에서 확인해보세요.",
     },
     {
       hid: "keywords",
@@ -451,7 +682,7 @@ useHead({
 }
 
 .li {
-  margin-left: 3%;
+  margin-left: 2%;
 }
 .timer {
   font-size: 15px;
@@ -477,10 +708,41 @@ useHead({
 .input-area {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 20px;
   width: 50%;
   margin-bottom: 0;
 }
+
+/*말하기 버튼, 질문듣기 버튼*/
+.button-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* 필터 칩 스타일링 */
+.filter-chip {
+  margin: 5px;
+  font-size: 14px;
+}
+
+.selected-chip {
+  background-color: #6366f1 !important;
+  color: white !important;
+}
+
+.unselected-chip {
+  background-color: #e0e0e0 !important;
+  color: black !important;
+}
+
+/*
+.chip-selected {
+  background-color: #8094f4; /* 선택된 칩의 배경색을 초록색으로 변경 
+  color: white; /* 텍스트 색상을 하얀색으로 변경
+} */
 
 textarea {
   flex-grow: 1;

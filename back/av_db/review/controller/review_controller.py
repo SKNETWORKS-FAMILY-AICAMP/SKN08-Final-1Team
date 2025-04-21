@@ -18,7 +18,7 @@ class ReviewController(viewsets.ViewSet):
         reviewDescription = request.data.get('reviewDescription')
         print(f'reviewId : {reviewId}, reviewTitle: {reviewTitle}, reviewDescription: {reviewDescription}')
 
-        review = self.reviewService.getreviewByreviewId(reviewId)
+        review = self.reviewService.getReviewByReviewId(reviewId)
         result = self.reviewService.registerTitleDescription(review, reviewTitle, reviewDescription)
         return Response(result, status=status.HTTP_200_OK)
 
@@ -30,7 +30,7 @@ class ReviewController(viewsets.ViewSet):
         images = request.FILES.getlist('images')
         print('reviewId: ', reviewId, 'questionTitle: ', questionTitle, 'questionType: ', questionType,
               'essential: ', essential, 'images: ', images)
-        review = self.reviewService.getreviewByreviewId(reviewId)
+        review = self.reviewService.getReviewByReviewId(reviewId)
         result = self.reviewService.registerQuestion(review, questionTitle, questionType, essential, images)
         return Response(result, status=status.HTTP_200_OK)
 

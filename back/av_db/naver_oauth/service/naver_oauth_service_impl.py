@@ -29,3 +29,7 @@ class NaverOauthServiceImpl(NaverOauthService):
 
     def requestUserInfo(self, accessToken):
         return self.__naverOauthRepository.getUserInfo(accessToken)
+
+    def requestNaverWithdrawLink(self, accessToken):
+        return self.__naverOauthRepository.getWithdrawLink(accessToken)
+

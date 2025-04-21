@@ -3,12 +3,12 @@
     <v-main>
       <!-- NavigationBar 고정 -->
       <NavigationBar />
+      <NuxtPage />
       <div class="footer-container" style="color: black">
         <p class="reserved-info">
           2025-2026 JOBSTICK Korea LLC. All Rights Reserved.
         </p>
       </div>
-      <NuxtPage />
     </v-main>
   </v-app>
 </template>

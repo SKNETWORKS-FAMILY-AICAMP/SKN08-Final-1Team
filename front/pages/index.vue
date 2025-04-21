@@ -23,12 +23,12 @@
 
 <script>
 import { defineComponent } from "vue";
-import HomeMain from "./components/HomeMain.vue";
-import HomeSecond from "./components/HomeSecond.vue";
-import HomeThird from "./components/HomeThird.vue";
-import HomeFour from "./components/HomeFour.vue";
-import HomeFive from "./components/HomeFive.vue";
-import HomeSix from "./components/HomeSix.vue";
+import HomeMain from "@/components/HomeMain.vue";
+import HomeSecond from "@/components/HomeSecond.vue";
+import HomeThird from "@/components/HomeThird.vue";
+import HomeFour from "@/components/HomeFour.vue";
+import HomeFive from "@/components/HomeFive.vue";
+import HomeSix from "@/components/HomeSix.vue";
 
 export default defineComponent({
   components: {
