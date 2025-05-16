@@ -2,11 +2,11 @@ from enum import Enum
 
 class JobCategory(Enum):
     BACKEND = 1
-    FRONT = 2
-    DEVOPS = 3
+    FRONTEND = 2
+    EMBEDDED = 3
     AI = 4
-    EMBEDDED = 5
-    AppWeb = 6
+    DEVOPS = 5
+    WEBAPP = 6
 
     @classmethod
     def get_job_name(cls, job_id: int) -> str:

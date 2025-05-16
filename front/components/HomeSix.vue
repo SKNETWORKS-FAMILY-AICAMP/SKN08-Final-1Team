@@ -99,7 +99,6 @@ export default defineComponent({
 .home-six {
   width: 100%;
   min-height: 100vh; /* 페이지가 적어도 전체 화면을 덮도록 설정 */
-  background: url("@/assets/images/fixed/home_bg2.jpg") center center;
   background-size: cover; /* 배경 이미지 크기를 화면 크기에 맞추어 조정 */
   background-attachment: fixed; /* 배경 이미지를 고정하여 스크롤 시에도 배경이 고정되도록 설정 */
   display: flex;
@@ -167,18 +166,18 @@ h1 {
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 100px;  /* 강제로 영역 확보 */
+  min-height: 100px; /* 강제로 영역 확보 */
 }
 .scrollupanimation {
   position: absolute;
   bottom: 7vh;
-  left: 50%;
+  left: 47%;
   transform: translateX(-50%);
   animation: bounce 6s ease 0s infinite;
   animation-delay: 5s;
 }
 .content-image img {
-  display: block;  /* 추가 */
+  display: block; /* 추가 */
   width: 100%;
   height: auto;
   max-height: 250px;
@@ -218,5 +217,4 @@ h1 {
     border: 1px solid red; /* 디버깅용 */
   }
 }
-
 </style>

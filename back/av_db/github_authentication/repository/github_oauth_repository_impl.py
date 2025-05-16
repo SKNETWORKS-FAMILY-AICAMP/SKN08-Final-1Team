@@ -18,6 +18,7 @@ class GithubOauthRepositoryImpl(GithubOauthRepository):
             cls.__instance.tokenRequestUri = settings.GITHUB['TOKEN_REQUEST_URI']
             cls.__instance.userInfoRequestUri = settings.GITHUB['USER_INFO_REQUEST_URI']
             cls.__instance.adminCode = settings.GITHUB['ADMIN_CODE']
+            cls.__instance.scope = settings.GITHUB['SCOPE']
 
         return cls.__instance
 
@@ -32,7 +33,7 @@ class GithubOauthRepositoryImpl(GithubOauthRepository):
         print("getOauthLink() for Login")
 
         return (f"{self.loginUrl}?"
-                f"client_id={self.clientId}&redirect_uri={self.redirectUri}")
+                f"client_id={self.clientId}&redirect_uri={self.redirectUri}&scope={self.scope}")
 
     def getAccessToken(self, githubAuthCode):
         print(f"getAccessToken(): {githubAuthCode}")

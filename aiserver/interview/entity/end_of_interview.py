@@ -1,1 +1,14 @@
-# 면접 종료 후 모든 질문(GPT질문) 답변(사용자 답변) 저장
+from dataclasses import dataclass
+from typing import List
+
+@dataclass(frozen=True)
+class EndOfInterview:
+    interview_id: int
+    user_token: str
+    question_id: int
+    answer_text: str
+    topic: int
+    experience_level: int
+    project_experience: int
+    academic_background: int
+    tech_stack: List[int]

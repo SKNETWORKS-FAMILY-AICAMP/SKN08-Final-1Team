@@ -1,165 +1,49 @@
-import { AxiosResponse } from "axios";
 import * as axiosUtility from "../../utility/axiosInstance";
-import { useReviewStore } from "./reviewStore";
-import { Review } from "./reviewState";
+import type { AxiosResponse } from "axios";
 
 export const reviewActions = {
-  async requestCreateReviewFormToDjango(
-    randomString: string
-  ): Promise<AxiosResponse> {
+  async requestReviewListToDjango(this: {
+    reviewList: any[];
+    totalItems: number;
+    totalPages: number;
+  }) {
     const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
     try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/creat-form",
-        randomString
-      );
-      return res.data;
-    } catch (e) {
-      console.error("requestCreateReviewFormToDjango() -> error:", e);
-      throw e;
-    }
-  },
+      const res: AxiosResponse = await djangoAxiosInstance.get("/review/list", {
+        params: { page: 1, perPage: 8 },
+      });
 
-  async requestRegisterTitleAndDescriptionToDjango(payload: {
-    reviewId: number;
-    reviewTitle: string;
-    reviewDescription: string;
-  }): Promise<AxiosResponse> {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/register-title-description",
-        payload
-      );
-      return res.data;
-    } catch (e) {
+      this.reviewList = res.data.dataList;
+      this.totalItems = res.data.totalItems;
+      this.totalPages = res.data.totalPages;
+      console.log("📦 리뷰 목록 응답 전체:", res.data);
+    } catch (error: any) {
       console.error(
-        "requestRegisterTitleAndDescriptionToDjango() -> error:",
-        e
+        "❌ 리뷰 목록 불러오기 실패:",
+        error.response?.data || error.message
       );
-      throw e;
+      alert("리뷰 목록을 불러오는 데 실패했습니다.");
     }
   },
 
-  async requestCreateQuestionToDjango(
-    imageFormData: FormData
-  ): Promise<AxiosResponse> {
+  async requestSubmitReviewToDjango(this: any, formData: FormData) {
     const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
     try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/register-question",
-        imageFormData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+      console.log("📤 리뷰 등록 요청 데이터:", this.formData);
+      const response: AxiosResponse = await djangoAxiosInstance.post(
+        "/review/create",
+        formData
       );
-      return res.data;
-    } catch (e) {
-      console.error("requestCreateQuestionToDjango() -> error:", e);
-      throw e;
-    }
-  },
-
-  async requestRegisterSelectionToDjango(payload: {
-    questionId: number;
-    selection: string;
-  }): Promise<AxiosResponse> {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/register-selection",
-        payload
+      console.log("✅ 리뷰 등록 응답 수신:", response.data);
+      alert("리뷰가 성공적으로 등록되었습니다.");
+      // ✅ 리뷰 목록 갱신
+      await this.requestReviewListToDjango();
+    } catch (error: any) {
+      console.error(
+        "❌ 리뷰 등록 실패:",
+        error.response?.data || error.message
       );
-      return res.data;
-    } catch (e) {
-      console.error("requestRegisterSelectionToDjango() -> error:", e);
-      throw e;
-    }
-  },
-
-  async requestReviewListToDjango() {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse<{ reviewTitleList: Review[] }> =
-        await djangoAxiosInstance.get("/review/review-title-list");
-      this.reviewTitleList = res.data.reviewTitleList;
-    } catch (e) {
-      console.error("requestReviewListToDjango() -> error:", e);
-      throw e;
-    }
-  },
-
-  async requestReviewFormToDjango(randomString: string) {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse<Review> = await djangoAxiosInstance.get(
-        `/review/read-review-form/${randomString}`
-      );
-      this.reviewForm = res.data;
-    } catch (e) {
-      console.error("requestReviewFormToDjango() -> error:", e);
-      throw e;
-    }
-  },
-
-  async requestSubmitReviewToDjango(payload: {
-    submitForm: [];
-  }): Promise<AxiosResponse> {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/submit-review",
-        payload
-      );
-      return res.data;
-    } catch (e) {
-      console.error("requestSubmitReviewToDjango() -> error:", e);
-      throw e;
-    }
-  },
-
-  async requestRandomStringToDjango(reviewId: number): Promise<any> {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/randomstring",
-        reviewId
-      );
-      return res.data;
-    } catch (e) {
-      console.error("Django 서버에서 랜덤 문자열을 받아오지 못했습니다:", e);
-      return null;
-    }
-  },
-
-  async requestReviewResultToDjango(reviewId: number) {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse<Review> = await djangoAxiosInstance.get(
-        `/review/review-result/${reviewId}`
-      );
-      this.resultForm = res.data;
-    } catch (e) {
-      console.error("requestReviewResultToDjango() -> error:", e);
-      throw e;
-    }
-  },
-
-  async requestCheckIsFirstSubmit(accountId: {
-    accountId: string;
-  }): Promise<AxiosResponse> {
-    const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
-    try {
-      const res: AxiosResponse = await djangoAxiosInstance.post(
-        "/review/check-first-submit",
-        accountId
-      );
-      return res.data;
-    } catch (e) {
-      console.error("requestCheckIsFirstSubmit() -> error:", e);
-      throw e;
+      alert("리뷰 등록 중 오류가 발생했습니다.");
     }
   },
 };

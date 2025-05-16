@@ -3,7 +3,7 @@ import { AxiosResponse } from "axios"
 
 export const orderAction = {
     async requestCartToAddOrderToDjango(payload) {
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
+        const {djangoAxiosInstance} = axiosUtility.createAxiosInstances()
         try {
             const email = sessionStorage.getItem('email')
             if (!email) {
@@ -20,7 +20,7 @@ export const orderAction = {
                 }))
             }
 
-            const response = await djangoAxiosInst.post('/orders/cart', requestData)
+            const response = await djangoAxiosInstance.post('/orders/cart', requestData)
             // console.log('response data:', response.data)
             
             return response.data
@@ -30,11 +30,11 @@ export const orderAction = {
         }
     },
     async requestCompanyReportReadToAddOrderToDjango(payload: {email: string, companyReportId: number, companyReportPrice: number}): Promise<void> {
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
+        const {djangoAxiosInstance} = axiosUtility.createAxiosInstances()
         try {
             // console.log('payload:', payload)
 
-            const response = await djangoAxiosInst.post('/orders/company_report', payload )
+            const response = await djangoAxiosInstance.post('/orders/company_report', payload )
             console.log('response data:', response.data)
             
         } catch (error) { 
@@ -43,10 +43,10 @@ export const orderAction = {
         }
     },
     async requestMyOrderListToDjango(userToken: string): Promise<void> {
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
+        const {djangoAxiosInstance} = axiosUtility.createAxiosInstances()
         try {
             const email = sessionStorage.getItem("email")
-            const res: AxiosResponse<any, any> = await djangoAxiosInst.post('/orders/list/', { email: email });
+            const res: AxiosResponse<any, any> = await djangoAxiosInstance.post('/orders/list/', { email: email });
             // console.log('data:', res)
             const data = res.data;
             // console.log('data:', data)
@@ -57,9 +57,9 @@ export const orderAction = {
         }
     },
     async requestMyOrderItemListToDjango(ordersId: number): Promise<void> {
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
+        const {djangoAxiosInstance} = axiosUtility.createAxiosInstances()
         try {
-            const res = await djangoAxiosInst.post(`/orders/read/${ordersId}`);
+            const res = await djangoAxiosInstance.post(`/orders/read/${ordersId}`);
             this.orderItemList = res.data
             return this.orderItemList
         } catch (error) {
@@ -68,10 +68,10 @@ export const orderAction = {
         }
     },
     async requestOrderItemDuplicationCheckToDjango(payload: {email: string, companyReportId: number}): Promise<void> {
-        const {djangoAxiosInst} = axiosUtility.createAxiosInstances()
+        const {djangoAxiosInstance} = axiosUtility.createAxiosInstances()
         
         try{
-            const res = await djangoAxiosInst.post('/orders/order-item-duplication-check', { "payload": payload })
+            const res = await djangoAxiosInstance.post('/orders/order-item-duplication-check', { "payload": payload })
             return res.data
         } catch(error){
             console.error('requestOrderItemDuplicationCheckToDjango() 문제 발생:', error);

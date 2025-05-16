@@ -66,7 +66,12 @@ class GoogleOauthController(viewsets.ViewSet):
                     accountProfile = self.accountProfileService.createAccountProfile(
                         account.getId(), nickname, gender, birthyear, age_range
                     )
-
+                    print(f"accountProfile: {accountProfile}")
+                else:
+                    # 이미 있는 사용자라도 profile 정보를 최신화 (Google은 불완전할 수 있음)
+                    accountProfile = self.accountProfileService.updateAccountProfileIfExists(
+                        account.getId(), nickname, gender, birthyear, age_range
+                    )
                     print(f"accountProfile: {accountProfile}")
 
                 # account = self.accountService.checkEmailDuplication(email)
@@ -128,6 +133,13 @@ class GoogleOauthController(viewsets.ViewSet):
                 accountProfile = self.accountProfileService.createAccountProfile(
                     account.getId(), nickname, gender, birthyear, age_range
                 )
+                print(f"accountProfile: {accountProfile}")
+            else:
+                # 이미 있는 사용자라도 profile 정보를 최신화 (Google은 불완전할 수 있음)
+                accountProfile = self.accountProfileService.updateAccountProfileIfExists(
+                    account.getId(), nickname, gender, birthyear, age_range
+                )
+                print(f"accountProfile: {accountProfile}")
 
             print("ready to create userToken")
             # 사용자 토큰 생성 및 Redis에 저장

@@ -5,3 +5,4 @@ class LoginType(models.TextChoices):
     GOOGLE = 'GOOGLE', 'google'
     NAVER = 'NAVER', 'naver'
     GITHUB = 'GITHUB', 'github'
+    GUEST = 'GUEST', 'guest'

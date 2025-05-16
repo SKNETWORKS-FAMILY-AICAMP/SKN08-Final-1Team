@@ -34,3 +34,7 @@ class AccountRepository(ABC):
     @abstractmethod
     def deleteAccount(self, accountId: int) -> bool:
         pass
+
+    @abstractmethod
+    def countEmail(self, guest_email):
+        pass

@@ -130,3 +130,26 @@ class AccountProfileServiceImpl(AccountProfileService):
             return accountProfile  # account 객체에서 이메일 반환
         except ObjectDoesNotExist:
             return None
+
+    def updateAccountProfileIfExists(self, accountId, nickname, gender, birthyear, age_range):
+        account = self.__accountRepository.findById(accountId)
+        try:
+            profile = self.__accountProfileRepository.findByAccount(account)
+            if profile:
+                if nickname:
+                    profile.nickname = nickname
+                if gender:
+                    profile.gender = gender
+                if birthyear:
+                    profile.birthyear = birthyear
+                if age_range:
+                    profile.age_range = age_range
+                profile.save()
+                print(f"기존 프로필 갱신 완료: {profile}")
+                return True
+            else:
+                # 없으면 생성
+                return self.createAccountProfile(accountId, nickname, gender, birthyear, age_range)
+        except Exception as e:
+            print(f"프로필 갱신 중 오류 발생: {str(e)}")
+            return False

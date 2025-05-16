@@ -11,143 +11,149 @@
         <div class="content-container">
           <div class="content-title" data-aos="fade-up" data-aos-offset="400">
             <p><span class="title-span">JOBSTICK</span></p>
-            <p>팀원을 소개합니다.</p>
+            <p style="color: black;">팀원을 소개합니다.</p>
           </div>
           <div class="image-container">
             <div class="image-card-container">
-              <v-card
-                flat
-                class="flip-card-container"
-                data-aos="fade-up"
-                data-aos-anchor=".content-title"
-                data-aos-delay="100"
-                data-aos-offset="400"
-              >
-                <div class="card-inner">
-                  <div class="card-front">
-                    <v-img src="@/assets/images/fixed/kim.png" cover />
-                  </div>
-                  <div class="card-back">
-                    <div class="text-card">
-                      <p>이름: 김현우</p>
-                      <p>
-                        GitHub:
-                        <a href="https://github.com/kimhyeonu4586" class="link"
-                          >@kimhyeonu4586</a
-                        >
-                      </p>
+              <div class="flip-wrapper" data-aos="fade-up" data-aos-delay="100">
+                <v-card
+                  flat
+                  class="flip-card-container"
+                  :class="{ flipped: isFlipped[0] }"
+                  @click="toggleFlip(0)"
+                >
+                  <div class="card-inner">
+                    <div class="card-front">
+                      <v-img src="@/assets/images/fixed/kim.png" cover />
+                    </div>
+                    <div class="card-back">
+                      <div class="text-card">
+                        <p>이름: 김현우</p>
+                        <p>
+                          GitHub:
+                          <a
+                            href="https://github.com/kimhyeonu4586"
+                            class="link"
+                            >@kimhyeonu4586</a
+                          >
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </v-card>
+                </v-card>
+              </div>
 
-              <v-card
-                flat
-                class="flip-card-container"
-                data-aos="fade-up"
-                data-aos-anchor=".content-title"
-                data-aos-delay="200"
-                data-aos-offset="400"
-              >
-                <div class="card-inner">
-                  <div class="card-front">
-                    <v-img src="@/assets/images/fixed/choi.jpg" cover> </v-img>
-                  </div>
-                  <div class="card-back">
-                    <div class="text-card">
-                      <p>이름: 최병준</p>
-                      <p>
-                        GitHub:<a
-                          href="https://github.com/ChoiByuengJun"
-                          class="link"
-                          >@ChoiByuengJun</a
-                        >
-                      </p>
+              <div class="flip-wrapper" data-aos="fade-up" data-aos-delay="200">
+                <v-card
+                  flat
+                  class="flip-card-container"
+                  :class="{ flipped: isFlipped[1] }"
+                  @click="toggleFlip(1)"
+                >
+                  <div class="card-inner">
+                    <div class="card-front">
+                      <v-img src="@/assets/images/fixed/choi.jpg" cover>
+                      </v-img>
+                    </div>
+                    <div class="card-back">
+                      <div class="text-card">
+                        <p>이름: 최병준</p>
+                        <p>
+                          GitHub:<a
+                            href="https://github.com/ChoiByuengJun"
+                            class="link"
+                            >@ChoiByuengJun</a
+                          >
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </v-card>
+                </v-card>
+              </div>
 
-              <v-card
-                flat
-                class="flip-card-container"
-                data-aos="fade-up"
-                data-aos-anchor=".content-title"
-                data-aos-delay="300"
-                data-aos-offset="400"
-              >
-                <div class="card-inner">
-                  <div class="card-front">
-                    <v-img src="@/assets/images/fixed/yang.jpg" cover> </v-img>
-                  </div>
-                  <div class="card-back">
-                    <div class="text-card">
-                      <p>이름: <span style="color: red">[팀장]</span>양의정</p>
-                      <p>
-                        GitHub:<a
-                          href="https://github.com/UiJungYang6"
-                          class="link"
-                          >@UiJungYang</a
-                        >
-                      </p>
+              <div class="flip-wrapper" data-aos="fade-up" data-aos-delay="300">
+                <v-card
+                  flat
+                  class="flip-card-container"
+                  :class="{ flipped: isFlipped[2] }"
+                  @click="toggleFlip(2)"
+                >
+                  <div class="card-inner">
+                    <div class="card-front">
+                      <v-img src="@/assets/images/fixed/yang.jpg" cover>
+                      </v-img>
+                    </div>
+                    <div class="card-back">
+                      <div class="text-card">
+                        <p>
+                          이름: <span style="color: red">[팀장]</span>양의정
+                        </p>
+                        <p>
+                          GitHub:<a
+                            href="https://github.com/UiJungYang"
+                            class="link"
+                            >@UiJungYang</a
+                          >
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </v-card>
+                </v-card>
+              </div>
 
-              <v-card
-                flat
-                class="flip-card-container"
-                data-aos="fade-up"
-                data-aos-anchor=".content-title"
-                data-aos-delay="400"
-                data-aos-offset="400"
-              >
-                <div class="card-inner">
-                  <div class="card-front">
-                    <v-img src="@/assets/images/fixed/min.jpg" cover> </v-img>
-                  </div>
-                  <div class="card-back">
-                    <div class="text-card">
-                      <p>이름: 오민수</p>
-                      <p>
-                        GitHub:<a
-                          href="https://github.com/yooodleee"
-                          class="link"
-                          >@yooodleee</a
-                        >
-                      </p>
+              <div class="flip-wrapper" data-aos="fade-up" data-aos-delay="400">
+                <v-card
+                  flat
+                  class="flip-card-container"
+                  :class="{ flipped: isFlipped[3] }"
+                  @click="toggleFlip(3)"
+                >
+                  <div class="card-inner">
+                    <div class="card-front">
+                      <v-img src="@/assets/images/fixed/min.jpg" cover> </v-img>
+                    </div>
+                    <div class="card-back">
+                      <div class="text-card">
+                        <p>이름: 오민수</p>
+                        <p>
+                          GitHub:<a
+                            href="https://github.com/yooodleee"
+                            class="link"
+                            >@yooodleee</a
+                          >
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </v-card>
-
-              <v-card
-                flat
-                class="flip-card-container"
-                data-aos="fade-up"
-                data-aos-anchor=".content-title"
-                data-aos-delay="500"
-                data-aos-offset="400"
-              >
-                <div class="card-inner">
-                  <div class="card-front">
-                    <v-img src="@/assets/images/fixed/wang.jpg" cover> </v-img>
-                  </div>
-                  <div class="card-back">
-                    <div class="text-card">
-                      <p>이름: 왕환민</p>
-                      <p>
-                        GitHub:<a
-                          href="https://github.com/minleewang"
-                          class="link"
-                          >@minleewang</a
-                        >
-                      </p>
+                </v-card>
+              </div>
+              <div class="flip-wrapper" data-aos="fade-up" data-aos-delay="500">
+                <v-card
+                  flat
+                  class="flip-card-container"
+                  :class="{ flipped: isFlipped[4] }"
+                  @click="toggleFlip(4)"
+                >
+                  <div class="card-inner">
+                    <div class="card-front">
+                      <v-img src="@/assets/images/fixed/wang.jpg" cover>
+                      </v-img>
+                    </div>
+                    <div class="card-back">
+                      <div class="text-card">
+                        <p>이름: 왕환민</p>
+                        <p>
+                          GitHub:<a
+                            href="https://github.com/minleewang"
+                            class="link"
+                            >@minleewang</a
+                          >
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </v-card>
+                </v-card>
+              </div>
             </div>
           </div>
         </div>
@@ -159,11 +165,16 @@
 <script>
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { defineComponent, onMounted, onBeforeUnmount, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
   name: "HomeSecond",
   setup() {
+    const isFlipped = ref([false, false, false, false, false]);
+    const toggleFlip = (index) => {
+      isFlipped.value[index] = !isFlipped.value[index];
+    };
+
     onMounted(() => {
       AOS.init({
         duration: 1000,
@@ -171,7 +182,10 @@ export default defineComponent({
       });
     });
 
-    return {};
+    return {
+      isFlipped,
+      toggleFlip,
+    };
   },
 });
 </script>
@@ -180,7 +194,6 @@ export default defineComponent({
 /*페이지 전체 틀 및 백그라운드 사진*/
 .home-second {
   width: 100%;
-  background: url("@/assets/images/fixed/home_bg2.jpg") center center;
   background-size: cover;
   background-attachment: fixed;
   display: flex;
@@ -265,12 +278,13 @@ export default defineComponent({
 
 /*이미지가 들어가는 카드 창 관리*/
 .v-card {
-  width: 200px;
-  height: 260px; /* 명확한 높이 지정 */
+  width: 100%;
+  height: 100%;
   background-color: transparent;
   box-shadow: none;
   overflow: visible;
   border: none;
+  flex-shrink: 0;
 }
 
 /*들어가는 이미지 관리*/
@@ -288,7 +302,7 @@ export default defineComponent({
 .v-img {
   width: 100%;
   height: 100%;
-  transition: transform 0.3s ease;
+  object-fit: cover;
   border-radius: 25px;
 }
 
@@ -299,13 +313,22 @@ export default defineComponent({
 
 .text-card {
   position: relative;
-  top: 5%;
-  left: 5%;
+  padding: 10px 15px; /* 내부 여백으로 정리 */
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden; /* 넘침 방지 */
+  justify-content: center;
+}
+
+.text-card a {
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden; /* 넘치면 숨김 */
+  text-overflow: ellipsis; /* 넘치면 말줄임표 (...) */
+  display: inline-block;
+  max-width: 100%; /* 카드 너비 기준 */
+  font-size: 0.9rem; /* 글자 크기 살짝 축소 */
 }
 
 .text-card-container {
@@ -331,9 +354,17 @@ export default defineComponent({
 }
 
 /*클릭 시 화면 뒤집힘*/
-.flip-card-container:hover .card-inner {
+.flip-card-container.flipped .card-inner {
   transform: rotateY(180deg);
   border-radius: 25px;
+}
+
+.flip-wrapper {
+  width: 180px;
+  height: 240px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
 }
 
 .card-inner {
@@ -373,41 +404,30 @@ export default defineComponent({
 
 /*모바일 전용*/
 @media screen and (max-width: 1280px) {
-  .v-card {
-    width: 30% !important;
+  .flip-wrapper {
+    width: 28%;
+    height: 220px;
   }
 }
-
 @media screen and (max-width: 900px) {
-  .v-card {
-    width: 45% !important;
+  .flip-wrapper {
+    width: 40%;
+    height: 200px;
   }
 }
-
 @media screen and (max-width: 600px) {
-  .v-card {
-    width: 90% !important;
+  .flip-wrapper {
+    width: 80%;
     height: auto;
-    min-height: 220px; /* ✅ 최소 높이 지정 */
+    min-height: 220px; /* ✅ 이게 핵심 */
   }
 
-  .v-img {
-    height: 100%;
-    min-height: 220px; /* ✅ 이미지가 사라지지 않도록 */
-    object-fit: cover;
-  }
-
-  .flip-card-container {
-    min-height: 220px; /* ✅ 카드 전체도 최소 높이 확보 */
-  }
-
-  .card-inner {
-    min-height: 220px;
-  }
-
+  .flip-card-container,
+  .card-inner,
   .card-front,
-  .card-back {
-    min-height: 220px;
+  .card-back,
+  .v-img {
+    min-height: 220px; /* ✅ 이미지, 카드 높이 보장 */
   }
 }
 </style>

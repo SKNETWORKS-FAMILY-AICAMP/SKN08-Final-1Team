@@ -38,6 +38,7 @@ services:
       - GITHUB_TOKEN_REQUEST_URI=${GITHUB_TOKEN_REQUEST_URI}
       - GITHUB_USER_INFO_REQUEST_URI=${GITHUB_USER_INFO_REQUEST_URI}
       - GITHUB_ADMIN_CODE=${GITHUB_ADMIN_CODE}
+      - GITHUB_SCOPE=${GITHUB_SCOPE}
       - NAVER_LOGIN_URL=${NAVER_LOGIN_URL}
       - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
       - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
@@ -52,6 +53,8 @@ services:
       - GOOGLE_TOKEN_REQUEST_URI=${GOOGLE_TOKEN_REQUEST_URI}
       - GOOGLE_USER_INFO_REQUEST_URI=${GOOGLE_USER_INFO_REQUEST_URI}
       - GOOGLE_REVOKE_URL=${GOOGLE_REVOKE_URL}
+      - FASTAPI_URL=https://sj6bo9orbe.execute-api.ap-northeast-2.amazonaws.com
+      - FIBER_URL=${FIBER_URL}
     networks:
       - app
 
@@ -91,4 +94,4 @@ volumes:
 
 networks:
   app:
-    driver: bridge
+    external: true

@@ -19,11 +19,7 @@
     >
       <v-btn text @click="goToHome" class="btn-text"> HOME </v-btn>
       <v-btn
-        v-if="
-          kakaoAuthenticationStore.isAuthenticated ||
-          googleAuthenticationStore.isAuthenticated ||
-          naverAuthenticationStore.isAuthenticated
-        "
+        v-if="isLoggedIn"
         text
         @click="goToReviewListPage"
         class="btn-text"
@@ -37,18 +33,12 @@
       <v-btn text @click="goToLlmTestPage" class="btn-text">
         AI INTERVIEW
       </v-btn>
+      <v-btn text @click="goToMembership" class="btn-text"> MEMBERSHIP </v-btn>
 
       <v-spacer></v-spacer>
 
       <!-- 로그인 후 화면-->
-      <v-menu
-        v-if="
-          kakaoAuthenticationStore.isAuthenticated ||
-          googleAuthenticationStore.isAuthenticated ||
-          naverAuthenticationStore.isAuthenticated
-        "
-        close-on-content-click
-      >
+      <v-menu v-if="isLoggedIn && !isAdminLoggedIn" close-on-content-click>
         <template v-slot:activator="{ props }">
           <v-btn v-bind="props" class="btn-text" style="margin-right: 14px">
             <b>My Page</b>
@@ -66,10 +56,7 @@
       </v-menu>
 
       <!--추후 관리자 추가하여 교체예정-->
-      <v-menu
-        v-if="githubAuthenticationStore.isAuthenticated"
-        close-on-content-click
-      >
+      <v-menu v-if="isAdminLoggedIn" close-on-content-click>
         <template v-slot:activator="{ props }">
           <v-btn v-bind="props" class="btn-text" style="margin-right: 14px">
             <b>ADMIN</b>
@@ -89,12 +76,7 @@
 
       <!--로그인/로그아웃 버튼-->
       <v-btn
-        v-if="
-          !kakaoAuthenticationStore.isAuthenticated &&
-          !googleAuthenticationStore.isAuthenticated &&
-          !naverAuthenticationStore.isAuthenticated &&
-          !githubAuthenticationStore.isAuthenticated
-        "
+        v-if="!isLoggedIn && !isAdminLoggedIn"
         text
         @click="signIn"
         class="btn-login"
@@ -118,18 +100,59 @@
 
       <!-- 드롭다운으로 뜨는 메뉴 항목 -->
       <v-list>
-        <v-list-item @click="goToHome">
-          <v-list-item-title>HOME</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="goToProductList">
-          <v-list-item-title>COMPANY REPORT</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="goToLlmTestPage">
-          <v-list-item-title>AI INTERVIEW</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="goToReviewListPage" v-if="isLoggedIn">
-          <v-list-item-title>REVIEW</v-list-item-title>
-        </v-list-item>
+        <template v-if="isLoggedIn && !isAdminLoggedIn">
+          <v-list-item @click="goToHome">
+            <v-list-item-title>HOME</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToProductList">
+            <v-list-item-title>COMPANY REPORT</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToLlmTestPage">
+            <v-list-item-title>AI INTERVIEW</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToReviewListPage">
+            <v-list-item-title>REVIEW</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToMembership">
+            <v-list-item-title>MEMBERSHIP</v-list-item-title>
+          </v-list-item>
+          <v-divider></v-divider>
+          <v-list-item
+            v-for="(item, index) in myPageItems"
+            :key="'mypage-menu-' + index"
+            @click="item.action"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </template>
+
+        <!-- ✅ 관리자 로그인 전용 메뉴 -->
+        <template v-else-if="isAdminLoggedIn">
+          <v-list-item
+            v-for="(item, index) in adminPageList"
+            :key="'admin-menu-' + index"
+            @click="item.action"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </template>
+
+        <!-- ✅ 비로그인 사용자 메뉴 -->
+        <template v-else>
+          <v-list-item @click="goToHome">
+            <v-list-item-title>HOME</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToProductList">
+            <v-list-item-title>COMPANY REPORT</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToLlmTestPage">
+            <v-list-item-title>AI INTERVIEW</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="goToMembership">
+            <v-list-item-title>MEMBERSHIP</v-list-item-title>
+          </v-list-item>
+        </template>
+
         <v-list-item v-if="!isLoggedIn" @click="signIn">
           <v-list-item-title>LOGIN</v-list-item-title>
         </v-list-item>
@@ -147,6 +170,7 @@ import { useRouter } from "vue-router";
 import { useKakaoAuthenticationStore } from "~/kakaoAuthentication/stores/kakaoAuthenticationStore";
 import { useNaverAuthenticationStore } from "~/naverAuthentication/stores/naverAuthenticationStore";
 import { useGoogleAuthenticationStore } from "~/googleAuthentication/stores/googleAuthenticationStore";
+import { useGuestAuthenticationStore } from "~/guestAuthentication/stores/guestAuthenticationStore";
 import { useGithubAuthenticationStore } from "~/githubAuthentication/stores/githubAuthenticationStore";
 import { useAuthenticationStore } from "~/authentication/stores/authenticationStore";
 import { useReviewStore } from "~/review/stores/reviewStore";
@@ -155,21 +179,26 @@ import { useReviewStore } from "~/review/stores/reviewStore";
 const kakaoAuthenticationStore = useKakaoAuthenticationStore();
 const googleAuthenticationStore = useGoogleAuthenticationStore();
 const naverAuthenticationStore = useNaverAuthenticationStore();
+const guestAuthenticationStore = useGuestAuthenticationStore();
 const githubAuthenticationStore = useGithubAuthenticationStore();
 const authenticationStore = useAuthenticationStore();
 const reviewStore = useReviewStore();
 
 const router = useRouter();
 const drawer = ref(false);
+//일반 유저들 로그인 상태 확인
 const isLoggedIn = computed(
   () =>
     kakaoAuthenticationStore.isAuthenticated ||
     googleAuthenticationStore.isAuthenticated ||
     naverAuthenticationStore.isAuthenticated ||
+    guestAuthenticationStore.isAuthenticated ||
     githubAuthenticationStore.isAuthenticated
 );
-
-// 데이터 선언
+//관리자 로그인 상태 확인
+const isAdminLoggedIn = computed(
+  () => githubAuthenticationStore.isAuthenticated
+);
 
 // 관리자 페이지
 const adminPageList = ref([
@@ -180,6 +209,10 @@ const adminPageList = ref([
   {
     title: "사용자 로그 현황",
     action: () => goToManagementUserLogList(),
+  },
+  {
+    title: "go서버 호출",
+    action: () => goToGO(),
   },
 ]);
 
@@ -213,15 +246,16 @@ const aiInterviewPageList = ref([
 // 라우터 이동 함수들
 const signIn = () => router.push("/account/login"); //로그인 페이지
 const goToHome = () => router.push("/"); // 홈 메인페이지
-const goToProductList = () => router.push("/companyReport/list"); // company report 페이지
+const goToProductList = () => router.push("/company-report/list"); // company report 페이지
 const goToCart = () => router.push("/cart/list"); // 카트페이지
 const goToOrder = () => router.push("/order/list"); // 주문내역 페이지
 const goToMyPage = () => router.push("/account/mypage"); // 내페이지
 const goToReviewListPage = () => router.push("/review/list"); // 리뷰페이지
 const goToManagementUserPage = () => router.push("/management/user");
 const goToManagementUserLogList = () => router.push("/management/log");
-// const goToAiInterviewPage = () => router.push('/ai-interview'); 나중에 확인
-const goToLlmTestPage = () => router.push("/ai-interview");
+const goToGO = () => router.push("/admin/default");
+const goToLlmTestPage = () => router.push("/ai-interview/llm-test");
+const goToMembership = () => router.push("/price");
 
 // 로그아웃 처리
 const signOut = async () => {
@@ -239,6 +273,7 @@ const signOut = async () => {
   naverAuthenticationStore.isAuthenticated = false;
   githubAuthenticationStore.isAuthenticated = false;
   googleAuthenticationStore.isAuthenticated = false;
+  guestAuthenticationStore.isAuthenticated = false;
   localStorage.removeItem("userToken");
   localStorage.removeItem("loginType");
   router.push("/");
@@ -258,38 +293,26 @@ const goToReview = async () => {
 
 // 사용자 상태 복원
 onMounted(async () => {
-  const kakaoUserToken = localStorage.getItem("userToken");
+  const userToken = localStorage.getItem("userToken");
+  const loginType = localStorage.getItem("loginType");
 
-  if (kakaoUserToken) {
-    const isValid = await kakaoAuthenticationStore.requestValidationUserToken(
-      kakaoUserToken
-    );
-    kakaoAuthenticationStore.isAuthenticated = isValid;
+  if (!userToken || !loginType) return;
+  const isValid = await authenticationStore.requestValidationUserToken(
+    userToken
+  );
+  if (!isValid) return;
+
+  if (loginType === "KAKAO") {
+    kakaoAuthenticationStore.isAuthenticated = true;
+  } else if (loginType === "GOOGLE") {
+    googleAuthenticationStore.isAuthenticated = true;
+  } else if (loginType === "NAVER") {
+    naverAuthenticationStore.isAuthenticated = true;
+  } else if (loginType === "GUEST") {
+    guestAuthenticationStore.isAuthenticated = true;
+  } else if (loginType === "GITHUB") {
+    githubAuthenticationStore.isAuthenticated = true;
   }
-
-  //const googleUserToken = localStorage.getItem("userToken");
-  //if (googleUserToken) {
-  //  const isValid = await googleAuthenticationStore.requestValidationUserToken(
-  //    googleUserToken
-  //  );
-  //  googleAuthenticationStore.isAuthenticatedGoogle = isValid;
-  //}
-
-  //const naverUserToken = localStorage.getItem("userToken");
-  //if (naverUserToken) {
-  //  const isValid = await naverAuthenticationStore.requestValidationUserToken(
-  //    naverUserToken
-  //  );
-  //  naverAuthenticationStore.isAuthenticatedNaver = isValid;
-  //}
-
-  //const adminToken = localStorage.getItem("adminToken");
-  //if (adminToken) {
-  //  kakaoAuthenticationStore.isKakaoAdmin = true;
-  //  googleAuthenticationStore.isGoogleAdmin = true;
-  // naverAuthenticationStore.isNaverAdmin = true;
-  //  accountStore.isNormalAdmin = true;
-  // }
 });
 </script>
 

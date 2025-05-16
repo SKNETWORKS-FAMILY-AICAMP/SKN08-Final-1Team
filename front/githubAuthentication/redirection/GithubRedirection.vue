@@ -22,6 +22,7 @@ const setRedirectGithubData = async () => {
   });
 
   localStorage.setItem("userToken", userToken);
+  localStorage.setItem("loginType", "GITHUB");
   githubAuthenticationStore.isAuthenticated = true;
 
   router.push("/");

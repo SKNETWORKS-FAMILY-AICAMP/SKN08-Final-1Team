@@ -1,27 +1,22 @@
+import uuid
+
 from account.repository.account_repository_impl import AccountRepositoryImpl
-from review.repository.review_answer_repository_impl import ReviewAnswerRepositoryImpl
-from review.repository.review_description_repository_impl import ReviewDescriptionRepositoryImpl
-from review.repository.review_question_repository_impl import ReviewQuestionRepositoryImpl
+from account_profile.repository.account_profile_repository_impl import AccountProfileRepositoryImpl
+from review.entity.review import Review
 from review.repository.review_repository_impl import ReviewRepositoryImpl
-from review.repository.review_selection_repository_impl import ReviewSelectionRepositoryImpl
-from review.repository.review_title_repository_impl import ReviewTitleRepositoryImpl
 from review.service.review_service import ReviewService
 
 
 class ReviewServiceImpl(ReviewService):
     __instance = None
+
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-            # cls.__instance.__reviewDocumentRepository = reviewDocumentRepositoryImpl.getInstance()
-            cls.__instance.__reviewRepository = ReviewRepositoryImpl.getInstance()
-            cls.__instance.__reviewTitleRepository = ReviewTitleRepositoryImpl.getInstance()
-            cls.__instance.__reviewDescriptionRepository = ReviewDescriptionRepositoryImpl.getInstance()
-            cls.__instance.__reviewQuestionRepository = ReviewQuestionRepositoryImpl.getInstance()
-            cls.__instance.__reviewSelectionRepository = ReviewSelectionRepositoryImpl.getInstance()
-            cls.__instance.__reviewAnswerRepository = ReviewAnswerRepositoryImpl.getInstance()
-            cls.__instance.__accountRepository = AccountRepositoryImpl().getInstance()
 
+            cls.__instance.__reviewRepository = ReviewRepositoryImpl.getInstance()
+            cls.__instance.__accountRepository = AccountRepositoryImpl.getInstance()
+            cls.__instance.__accountProfileRepository = AccountProfileRepositoryImpl.getInstance()
 
         return cls.__instance
 
@@ -32,135 +27,121 @@ class ReviewServiceImpl(ReviewService):
 
         return cls.__instance
 
-    def getRecentreview(self):
-        recentId = self.__reviewRepository.getMaxId()
-        return recentId
+    def requestList(self, page, perPage):
+        paginatedReviewList, totalItems = self.__reviewRepository.list(page, perPage)
 
-    def createReviewForm(self, randomString):
-        maxId = self.__reviewRepository.getMaxId()
-        self.__reviewRepository.registerReview(randomString)
-        return maxId + 1
+        totalPages = (totalItems + perPage - 1) // perPage
 
-    def getReviewByReviewId(self, reviewId):
-        review = self.__reviewRepository.findReview(reviewId)
-        return review
+        paginatedFilteringReviewList = [
+            {
+                "id": review.id,
+                "title": review.title,
+                "nickname": review.writer.email,  # writer 객체의 nickname 가져오기
+                "createDate": review.create_date.strftime("%Y-%m-%d %H:%M"),
+            }
+            for review in paginatedReviewList
+        ]
 
-    def getQuestionByQuestionId(self, questionId):
-        question = self.__reviewQuestionRepository.findQuestion(questionId)
-        return question
+        print(f"paginatedFilteringReviewList: {paginatedFilteringReviewList}")
 
-    def registerTitleDescription(self, review, reviewTitle, reviewDescription):
+        return paginatedFilteringReviewList, totalItems, totalPages
+
+    def requestUploadToS3(self, file, title):
+        filename = f"{title}-{uuid.uuid4()}.html"
+
+        print(f"filename: {filename}")
+
+        return self.__reviewRepository.uploadToS3(file, filename)
+
+    def requestCreate(self, title, content, accountId):
+        if not title or not content:
+            raise ValueError("Title and content are required fields.")
+        if not accountId:
+            raise ValueError("Account ID is required.")
+
+            # 2. Account 조회
+        account = self.__accountRepository.findById(accountId)
+        if not account:
+            raise ValueError(f"Account with ID {accountId} does not exist.")
+
+        # 4. Board 객체 생성 및 저장
+        review = Review(
+            title=title,
+            content=content,
+            writer=account)  # ForeignKey로 연결된 account_profile)
+        savedReview = self.__reviewRepository.save(review)
+
+        # 5. 응답 데이터 구조화
+        return {
+            "id": savedReview.id,
+            "title": savedReview.title,
+            "content": review.content,
+            "writerNickname": savedReview.writer.nickname,
+            "createDate": savedReview.create_date.strftime("%Y-%m-%d %H:%M"),
+        }
+
+    def requestRead(self, id):
+        review = self.__reviewRepository.findById(id)
+        if review:
+            return {
+                "id": review.id,
+                "title": review.title,
+                "content": review.content,
+                "createDate": review.create_date.strftime("%Y-%m-%d %H:%M"),
+                "nickname": review.writer.nickname
+            }
+
+        return None
+
+    def requestUpdate(self, id, title, accountId):
         try:
-            titleResult = self.__reviewTitleRepository.registerTitle(review, reviewTitle)
-            descriptionResult = self.__reviewDescriptionRepository.registerDescription(review, reviewDescription)
-            return titleResult & descriptionResult
-        except Exception as e:
-            print('설문 제목, 설명 저장 중 오류 발생 : ', e)
-            return False
+            account = self.__accountRepository.findById(accountId)
+            accountProfile = self.__accountProfileRepository.findByAccount(account)
 
-    def registerQuestion(self, review, questionTitle, questionType, essential, images):
+            review = self.__reviewRepository.findById(id)
+
+            # 게시글 작성자와 요청한 사용자가 동일한지 확인
+            if review.writer.id != accountProfile.id:
+                raise ValueError("You are not authorized to modify this post.")
+
+            # 제목 업데이트
+            review.title = title
+
+            # 게시글 저장 (수정)
+            updatedReview = self.__reviewRepository.save(review)
+
+            # 수정된 게시글 반환
+            return {
+                "id": updatedReview.id,
+                "title": updatedReview.title,
+                "content": updatedReview.content,
+                "writerNickname": updatedReview.writer.nickname,  # 작성자의 닉네임
+                "createDate": updatedReview.create_date.strftime("%Y-%m-%d %H:%M"),
+            }
+
+        except Review.DoesNotExist:
+            raise ValueError(f"BlogPost with ID {updatedReview} does not exist.")
+        except Exception as e:
+            raise Exception(f"Error while modifying the post: {str(e)}")
+
+    def requestDelete(self, id, accountId):
         try:
-            question = (
-                self.__reviewQuestionRepository.registerQuestion(review, questionTitle, questionType, essential, images))
-            return question
+            account = self.__accountRepository.findById(accountId)
+            accountProfile = self.__accountProfileRepository.findByAccount(account)
+
+            review = self.__reviewRepository.findById(id)
+            if not review:
+                raise ValueError(f"Review with ID {id} does not exist.")
+
+            if review.writer.id != accountProfile.id:
+                raise ValueError("You are not authorized to modify this post.")
+
+            content = f"review/{review.content}"
+            self.__reviewRepository.deleteFromS3(content)
+
+            # 게시글 삭제 요청
+            success = self.__reviewRepository.deleteById(id)
+            return success
 
         except Exception as e:
-            print('설문 질문 저장 중 오류 발생 : ', e)
-            return False
-
-
-    def registerSelection(self, question, selection):
-        try:
-            result = self.__reviewSelectionRepository.registerSelection(question, selection)
-            return result
-        except Exception as e:
-            print('설문 선택 항목 저장 중 오류 발생 : ', e)
-            return False
-
-    def getReviewList(self):
-        return self.__reviewTitleRepository.getAllTitles()
-
-    def getRandomStringList(self):
-        return self.__reviewRepository.getAllRandomString()
-
-    def getServeyById(self, reviewId):
-        reviewTitle = self.__reviewTitleRepository.getTitleByreviewId(reviewId)
-        reviewDescription = self.__reviewDescriptionRepository.getDescriptionByreviewId(reviewId)
-        reviewQuestions = self.__reviewQuestionRepository.getQuestionsByreviewId(reviewId)
-
-        for question in reviewQuestions:
-            if question['questionType'] != 'text':
-                selection = self.__reviewSelectionRepository.getSelectionsByQuestionId(question['questionId'])
-                question['selection'] = selection
-
-        reviewForm = {'reviewId': reviewId, 'reviewTitle': reviewTitle,
-                'reviewDescription': reviewDescription, 'reviewQuestions': reviewQuestions}
-
-        return reviewForm
-
-    def saveAnswer(self, answers, account):
-        try:
-            if account is not None:
-                account = self.__accountRepository.findById(account)
-
-            for answer in answers:
-                questionId = answer.get('questionId')
-                question = self.__reviewQuestionRepository.findQuestion(questionId)
-
-                if answer['questionType'] == 'text':
-                    answer = answer.get('answer')
-                    textAnswer = self.__reviewAnswerRepository.saveTextAnswer(question, answer, account)
-
-                elif answer['questionType'] == 'radio':
-                    selection = answer.get('answer')
-                    selection = self.__reviewSelectionRepository.findSelectionBySelectionName(question, selection)
-                    checkboxAnswer = self.__reviewAnswerRepository.saveRadioAnswer(question, selection, account)
-
-                elif answer['questionType'] == 'checkbox':
-                    selectionNameArray = answer.get('answer')
-                    selectionArray = \
-                        [self.__reviewSelectionRepository.findSelectionBySelectionName(question, selection) for selection in selectionNameArray]
-                    radioAnswer = self.__reviewAnswerRepository.saveCheckboxAnswer(question, selectionArray, account)
-
-        except Exception as e:
-            print('답변 저장중 오류 발생: ', {e})
-
-    def getReviewIdByRandomString(self, randomString):
-        return self.__reviewRepository.findreviewIdByRandomString(randomString)
-
-    def getRandomstringByreviewId(self,reviewId):
-        return self.__reviewRepository.findRandomStringByreviewId(reviewId)
-
-    def getResultById(self, reviewId):
-        reviewTitle = self.__reviewTitleRepository.getTitleByreviewId(reviewId)
-        reviewDescription = self.__reviewDescriptionRepository.getDescriptionByreviewId(reviewId)
-        reviewQuestions = self.__reviewQuestionRepository.getQuestionsByreviewId(reviewId)
-
-        for question in reviewQuestions:
-            if question['questionType'] == 'text':
-                answer = self.__reviewAnswerRepository.getTextAnswersByQuestionId(question['questionId'])
-                question['answer'] = answer
-            else:
-                selectionAnswer = self.__reviewAnswerRepository.getSelectionAnswersByQuestionId(question['questionId'])
-                convertedData = {}
-                for selectionId, value in selectionAnswer.items():
-                    selectionName = self.__reviewSelectionRepository.findSelectionBySelectionId(selectionId).selection
-                    convertedData[selectionName] = value
-
-                question['selection'] = convertedData
-        resultForm = {'reviewId': reviewId, 'reviewTitle': reviewTitle,
-                'reviewDescription': reviewDescription, 'reviewQuestions': reviewQuestions}
-        print('resultForm 생성이 완료되었습니다 : \n', resultForm)
-        return resultForm
-
-    def getAnswerByAccountId(self, accountId):
-        accountId = self.__accountRepository.findById(accountId)
-        isSubmitted = self.__reviewAnswerRepository.getAnswerByAccountId(accountId)
-        return isSubmitted
-
-
-
-
-
-
-
+            raise Exception(f"게시글 삭제 중 오류 발생: {str(e)}")

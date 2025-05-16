@@ -15,7 +15,7 @@ export default defineNuxtModule({
       pages.push({
         name: "OrderListPage",
         path: "/order/list",
-        file: resolve(themeDir, "order/pages/list/orderListPage.vue"), // 경로 수정
+        file: resolve(themeDir, "order/pages/list/order-list.vue"), // 경로 수정
       });
     });
     
@@ -23,7 +23,7 @@ export default defineNuxtModule({
         pages.push({
           name: "OrderReadPage",
           path: "/order/read/:ordersId",
-          file: resolve(themeDir, "order/pages/read/orderReadPage.vue"), // 경로 수정
+          file: resolve(themeDir, "order/pages/read/order-read.vue"), // 경로 수정
         });
       });
 

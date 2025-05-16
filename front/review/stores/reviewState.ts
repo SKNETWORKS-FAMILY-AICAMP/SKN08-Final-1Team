@@ -1,13 +1,5 @@
 export const reviewState = () => ({
-  reviewTitleList: [] as string[],
-  reviewForm: null as Review | null,
-  resultForm: null as Review | null,
+  reviewList: [] as any[],
+  totalItems: 0,
+  totalPages: 0,
 });
-
-export type Review = {
-  reviewId: number;
-  reviewTitle: string;
-  reviewDescription: string;
-  reviewQuestions: any[];
-  randomString: string;
-};

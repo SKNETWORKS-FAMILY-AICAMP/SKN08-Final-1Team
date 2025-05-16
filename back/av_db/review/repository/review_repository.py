@@ -1,27 +1,30 @@
 from abc import ABC, abstractmethod
 
+from review.entity.review import Review
+
 
 class ReviewRepository(ABC):
+
     @abstractmethod
-    def getMaxId(self):
+    def list(self, page, perPage):
         pass
 
     @abstractmethod
-    def registerReview(self, reviewId):
+    def uploadToS3(self, fileContent: str, filename: str):
         pass
 
     @abstractmethod
-    def findReview(self, reviewId):
+    def save(self, review: Review) -> Review:
         pass
 
     @abstractmethod
-    def getAllRandomString(self):
+    def findById(self, boardId):
         pass
 
     @abstractmethod
-    def findReviewIdByRandomString(self, randomString):
+    def deleteFromS3(self, filePath: str):
         pass
 
     @abstractmethod
-    def findRandomStringByReviewId(self, reviewId):
+    def deleteById(self, boardId):
         pass
