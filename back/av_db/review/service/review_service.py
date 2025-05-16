@@ -2,54 +2,23 @@ from abc import ABC, abstractmethod
 
 
 class ReviewService(ABC):
+
     @abstractmethod
-    def createReviewForm(self, randomString):
+    def requestList(self, page, perPage):
         pass
 
     @abstractmethod
-    def getReviewByReviewId(self, reviewId):
+    def requestUploadToS3(self, file, title):
         pass
 
     @abstractmethod
-    def getQuestionByQuestionId(self, questionId):
+    def requestCreate(self, title, content, accountId):
         pass
 
     @abstractmethod
-    def registerTitleDescription(self, review, reviewTitle, reviewDescription):
+    def requestRead(self, id):
         pass
 
     @abstractmethod
-    def registerQuestion(self, review, questionTitle, questionType, essential, images):
-        pass
-
-    @abstractmethod
-    def registerSelection(self, question, selection):
-        pass
-
-    @abstractmethod
-    def getReviewList(self):
-        pass
-
-    @abstractmethod
-    def getRandomStringList(self):
-        pass
-
-    @abstractmethod
-    def getServeyById(self, reviewId):
-        pass
-
-    @abstractmethod
-    def saveAnswer(self, answers, accountId):
-        pass
-
-    @abstractmethod
-    def getReviewIdByRandomString(self, randomString):
-        pass
-
-    @abstractmethod
-    def getResultById(self, reviewId):
-        pass
-
-    @abstractmethod
-    def getAnswerByAccountId(self, accountId):
+    def requestDelete(self, boardId, accountId):
         pass

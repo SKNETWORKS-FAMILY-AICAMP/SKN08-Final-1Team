@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
+from interview.service.request.question_generate_endInterview_request import EndInterviewRequest
 
 
 class InterviewService(ABC):
@@ -8,9 +9,21 @@ class InterviewService(ABC):
         pass
 
     @abstractmethod
-    def generateFollowupQuestion(self, interviewId: int, questionId: int, answerText: str, userToken: str) -> dict:
+    async def generateFirstFollowupQuestions(self, request: dict) -> dict:
         pass
 
     @abstractmethod
-    def end_interview(self, session_id: str, context: Dict[str, str], questions: List[str], answers: List[str]) -> Dict:
+    def generateProjectQuestion(self, request: dict) -> dict:
+        pass
+
+    @abstractmethod
+    async def generateProjectFollowupQuestion(self, request: dict) -> dict:
+        pass
+
+    @abstractmethod
+    async def generateTechFollowupQuestion(self, request: dict) -> dict:
+        pass
+
+    @abstractmethod
+    async def end_interview(self, request: EndInterviewRequest) -> str:
         pass

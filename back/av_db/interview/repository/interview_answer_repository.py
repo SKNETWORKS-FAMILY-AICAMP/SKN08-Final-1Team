@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from interview.entity.interview_answer import InterviewAnswer
+
 
 class InterviewAnswerRepository(ABC):
 

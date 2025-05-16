@@ -65,7 +65,6 @@ export default {
 .page-five {
   width: 100%;
   min-height: 100vh; /* 화면 전체를 덮도록 설정 */
-  background: url("@/assets/images/fixed/home_bg2.jpg") center center;
   background-size: cover; /* 배경 이미지를 화면에 맞게 확대 */
   background-attachment: fixed; /* 배경 이미지를 고정 */
   display: flex;

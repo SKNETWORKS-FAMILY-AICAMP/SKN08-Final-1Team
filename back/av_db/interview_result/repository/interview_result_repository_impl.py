@@ -39,12 +39,45 @@ class InterviewResultRepositoryImpl(InterviewResultRepository):
             InterviewResultQAS.objects.create(question=question, answer=answer, intent=intent,
                                               feedback=feedback, interview_result=interviewResult)
 
-    def getLastInterviewResult(self):
-        interviewResult = InterviewResult.objects.all()
-        return interviewResult.last()
+    def getLastInterviewResult(self,account):
+        result = InterviewResult.objects.filter(account=account).order_by('-id').first()
+        print(f"▶ getLastInterviewResultByAccount() → {result}")
+        return result
 
     def getLastInterviewResultQASList(self, interviewResult):
-        interviewResult = InterviewResultQAS.objects.filter(interview_result=interviewResult)
-        interviewResultQASList = interviewResult.order_by('id').values_list('question', 'answer', 'intent', 'feedback')
+        query = InterviewResultQAS.objects.filter(interview_result=interviewResult)
+        print(f"▶ QAS count: {query.count()}")  # 0이면 인터뷰에 QAS가 없음
+
+        interviewResultQASList = query.order_by('id').values_list('question', 'answer', 'intent', 'feedback')
+        print(f"▶ QAS values_list: {list(interviewResultQASList)}")  # 튜플 리스트로 출력
+
         return interviewResultQASList
 
+    def saveInterviewResult(self, accountId):
+        try:
+            interviewResult = InterviewResult.objects.create(account_id=accountId)
+            print("✅ 면접 완료 기록 저장")
+            return interviewResult
+        except Exception as e:
+            print(f"❌ 오류 발생: {e}")
+            raise
+
+    def saveQAScoreList(self, interview_result, qa_scores):
+        try:
+            for qa in qa_scores:
+                question = qa.get("question","")
+                answer = qa.get("answer","")
+                intent = qa.get("intent","기본") #없으면 기본값
+                feedback = qa.get("feedback","피드백 없음")
+
+                InterviewResultQAS.objects.create(
+                    interview_result=interview_result,
+                    question=question,
+                    answer=answer,
+                    intent=intent,
+                    feedback=feedback
+                )
+                print("평가 결과 저장 완료")
+        except Exception as e:
+            print(f"평가 결과 저장 실패: {e}")
+            raise

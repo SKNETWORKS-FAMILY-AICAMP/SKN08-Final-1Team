@@ -15,7 +15,7 @@ export default defineNuxtModule({
       pages.push({
         name: "cartListPage",
         path: "/cart/list",
-        file: resolve(themeDir, "cart/pages/CartListPage.vue")
+        file: resolve(themeDir, "cart/pages/cart-list.vue")
       });
     });
 

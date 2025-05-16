@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register(r'interview_result', InterviewResultController, basename='interview_result')
 urlpatterns = [
     path('', include(router.urls)),
-    path('save-interview-result', InterviewResultController.as_view({'post': 'saveInterviewResult'}), name='save-interview-result'),
+    path('end-interview', InterviewResultController.as_view({'post': 'requestEndInterview'}), name='end-interview'),
+    path('request-interview-summary', InterviewResultController.as_view({'post': 'requestInterviewSummary'}), name='request-interview-summary'),
     path('get-interview-result', InterviewResultController.as_view({'post': 'getInterviewResult'}), name='get-interview-result'),
 ]

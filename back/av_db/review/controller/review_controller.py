@@ -1,89 +1,126 @@
+import uuid
+
+from django.db import transaction
+from django.http import JsonResponse
+from django.shortcuts import render
 from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
 
 from review.service.review_service_impl import ReviewServiceImpl
+from redis_cache.service.redis_cache_service_impl import RedisCacheServiceImpl
 
 
 class ReviewController(viewsets.ViewSet):
     reviewService = ReviewServiceImpl.getInstance()
+    redisCacheService = RedisCacheServiceImpl.getInstance()
 
-    def createReviewForm(self, request):
-        randomString = request.data.get('randomString')
-        reviewId = self.reviewService.createReviewForm(randomString)
-        return Response(reviewId, status=status.HTTP_200_OK)
+    def requestReviewList(self, request):
+        getRequest = request.GET
+        page = int(getRequest.get("page", 1))
+        perPage = int(getRequest.get("perPage", 8))
+        paginatedReview, totalItems, totalPages = self.reviewService.requestList(page, perPage)
 
-    def registerTitleDescription(self, request):
-        reviewId = request.data.get('reviewId')
-        reviewTitle = request.data.get('reviewTitle')
-        reviewDescription = request.data.get('reviewDescription')
-        print(f'reviewId : {reviewId}, reviewTitle: {reviewTitle}, reviewDescription: {reviewDescription}')
+        # JSON 응답 생성
+        return JsonResponse({
+            "dataList": paginatedReview,  # 게시글 정보 목록
+            "totalItems": totalItems,  # 전체 게시글 수
+            "totalPages": totalPages  # 전체 페이지 수
+        }, status=status.HTTP_200_OK)
 
-        review = self.reviewService.getReviewByReviewId(reviewId)
-        result = self.reviewService.registerTitleDescription(review, reviewTitle, reviewDescription)
-        return Response(result, status=status.HTTP_200_OK)
+    def requestUploadReview(self, request):
+        fileContent = request.data.get('content')
+        if not fileContent:
+            return JsonResponse({'error': '파일을 제공해야 합니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def registerQuestion(self, request):
-        reviewId = request.data.get('reviewId')
-        questionTitle = request.data.get('questionTitle')
-        questionType = request.data.get('questionType')
-        essential = request.data.get('isEssential') == 'true'
-        images = request.FILES.getlist('images')
-        print('reviewId: ', reviewId, 'questionTitle: ', questionTitle, 'questionType: ', questionType,
-              'essential: ', essential, 'images: ', images)
-        review = self.reviewService.getReviewByReviewId(reviewId)
-        result = self.reviewService.registerQuestion(review, questionTitle, questionType, essential, images)
-        return Response(result, status=status.HTTP_200_OK)
+        print(f"fileContent: {fileContent}")
+        title = request.data.get('title')
 
-    def registerSelection(self, request):
-        questionId = request.data.get('questionId')
-        selection = request.data.get('selection')
-        print(f"questionId : {questionId}, selection : {selection}")
-        question = self.reviewService.getQuestionByQuestionId(questionId)
-        result = self.reviewService.registerSelection(question, selection)
-        return Response(result, status=status.HTTP_200_OK)
-
-    def reviewList(self, request):
-        reviewTitleList = self.reviewService.getreviewList()
-        randomStringList = self.reviewService.getRandomStringList()
-        combinedList = []
-        for review, random in zip(reviewTitleList, randomStringList):
-            combinedItem = {**review, **random}
-            combinedList.append(combinedItem)
-        return Response({'reviewTitleList': combinedList}, status=status.HTTP_200_OK)
-
-    def readreviewForm(self, request, randomString=None):
-        reviewId = self.reviewService.getreviewIdByRandomString(randomString)
-        reviewForm = self.reviewService.getServeyById(reviewId)
-        print('내보낼 결과 : ', reviewForm)
-        return Response(reviewForm, status.HTTP_200_OK)
-
-    def submitReview(self, request):
         try:
-            answers = request.data.get('submitForm')
-            accountId = request.data.get('accountId')
-            print("answers: ", answers, 'accountId :', accountId)
-
-            self.reviewService.saveAnswer(answers, accountId)
-
-            return Response(True, status.HTTP_200_OK)
+            filename = self.reviewService.requestUploadToS3(fileContent, title)
+            return JsonResponse({'filename': filename}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response(False, status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'error': f'오류 발생: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def pushRandomstring(self, request):
+    def requestCreateReview(self, request):
+        postRequest = request.data
+        print("📥 받은 데이터:", postRequest)
+
+        title = postRequest.get("title")
+        content = postRequest.get("content")
+        userToken = postRequest.get("userToken")
+
+        if not userToken:  # userToken이 없거나 빈 문자열이면 400 반환
+            return JsonResponse(
+                {"error": "User token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        accountId = self.redisCacheService.getValueByKey(userToken)
+        print(f'requestCreateBlogPost() accountId: ${accountId}')
+
+        if not accountId:  # userToken이 유효하지 않은 경우도 거부
+            return JsonResponse(
+                {"error": "Invalid user token."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        savedReview = self.reviewService.requestCreate(title, content, accountId)
+
+        return JsonResponse({"data": savedReview}, status=status.HTTP_200_OK)
+
+    def requestReadReview(self, request, pk=None):
         try:
-            reviewId = self.reviewService.getRecentreview()
-            data = self.reviewService.getRandomstringByreviewId(reviewId)
-            return Response(data=data, status=status.HTTP_200_OK)
+            if not pk:
+                return JsonResponse({"error": "ID를 제공해야 합니다."}, status=400)
+
+            print(f"requestReadReview() -> pk: {pk}")
+            readReview = self.reviewService.requestRead(pk)
+
+            return JsonResponse(readReview, status=200)
+
         except Exception as e:
-            print('randomString 가져오는 중 문제 발생 : ', e)
-            return Response(False, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": str(e)}, status=500)
 
-    def reviewResult(self, request, reviewId=None):
-        resultForm = self.reviewService.getResultById(reviewId)
-        return Response(resultForm, status.HTTP_200_OK)
+    def requestUpdateReview(self, request, pk=None):
+        try:
+            postRequest = request.data
+            print(f"postRequest: {postRequest}")
 
-    def checkIsFirstSubmit(self, request):
-        accountId = request.data.get('accountId')
-        isSubmitted = self.reviewService.getAnswerByAccountId(accountId)
-        return Response(isSubmitted, status.HTTP_200_OK)
+            title = postRequest.get("title")
+
+            # 필수 항목 체크
+            if not title:
+                return JsonResponse({"error": "Title are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            userToken = postRequest.get("userToken")
+            accountId = self.redisCacheService.getValueByKey(userToken)
+
+            # 게시글 수정 요청 처리
+            updatedReview = self.reviewService.requestUpdate(pk, title, accountId)
+
+            return JsonResponse(updatedReview, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def requestDeleteReview(self, request, pk=None):
+        try:
+            postRequest = request.data
+            print(f"postRequest: {postRequest}")
+
+            userToken = postRequest.get("userToken")
+            accountId = self.redisCacheService.getValueByKey(userToken)
+            if not accountId:
+                return JsonResponse({"error": "유저 토큰이 유효하지 않음"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 게시글 삭제 처리
+            success = self.reviewService.requestDelete(pk, accountId)
+
+            if success:
+                return JsonResponse({"message": "블로그 포스트가 삭제되었습니다."}, status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({"error": "블로그 포스트 삭제 실패"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

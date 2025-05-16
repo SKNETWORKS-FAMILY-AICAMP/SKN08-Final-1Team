@@ -23,7 +23,7 @@ export default defineComponent({
   position: relative;
   display: block;
   font-size: 1.5vh;
-  color: rgba(255, 255, 255, 1);
+  color: rgb(0, 0, 0);
   text-decoration: none;
   padding: 1vh 1vh 1vh 4vh;
 }
@@ -35,7 +35,7 @@ export default defineComponent({
   left: 0;
   width: 2.5vh;
   height: 4vh;
-  border: 0.2vh solid rgba(255, 255, 255, 1);
+  border: 0.2vh solid rgb(0, 0, 0);
   border-radius: 1.2vh;
   content: "";
 }
@@ -47,7 +47,7 @@ export default defineComponent({
   left: 1.1vh;
   width: 0.2vh;
   height: 0.8vh;
-  background: rgba(255, 255, 255, 1);
+  background: rgb(0, 0, 0);
   border-radius: 0.1vh;
   content: "";
   animation-name: scroll;

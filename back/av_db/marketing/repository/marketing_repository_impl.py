@@ -1,7 +1,7 @@
 from account_profile.repository.account_profile_repository_impl import AccountProfileRepositoryImpl
 from marketing.entity.marketing import Marketing
 from marketing.repository.marketing_repository import MarketingRepository
-from company_report.repository.companyReport_repository_impl import CompanyReportRepositoryImpl
+from company_report.repository.company_report_repository_impl import CompanyReportRepositoryImpl
 
 
 class MarketingRepositoryImpl(MarketingRepository):

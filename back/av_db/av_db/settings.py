@@ -53,17 +53,20 @@ INSTALLED_APPS = [
     'account_profile',
     'review',
     'company_report',
+    'company_job',
     'cart',
     'orders',
     'marketing',
     'interview',
-    #'interview_result',
+    'interview_result',
     'interview_question_data',
     'authentication',
     'github_authentication',
-    'blog_post',
     'excel_basic',
-    #    'github_action_monitor',
+    'github_action_monitor',
+    'guest_oauth',
+    'membership_plan',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -142,6 +145,7 @@ GITHUB = {
     'TOKEN_REQUEST_URI': os.getenv('GITHUB_TOKEN_REQUEST_URI'),
     'USER_INFO_REQUEST_URI': os.getenv('GITHUB_USER_INFO_REQUEST_URI'),
     'ADMIN_CODE': os.getenv('GITHUB_ADMIN_CODE'),
+    'SCOPE': os.getenv('GITHUB_SCOPE'),
 }
 
 TOSS_PAYMENTS = {

@@ -25,3 +25,7 @@ class AccountProfileService(ABC):
     @abstractmethod
     def findBirthyear(self, accountId):
         pass
+
+    @abstractmethod
+    def updateAccountProfileIfExists(self, accountId, nickname, gender, birthyear, age_range):
+        pass

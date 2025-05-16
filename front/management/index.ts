@@ -17,13 +17,13 @@ export default defineNuxtModule({
 					path: "/management/user",
 					file: resolve(
 						themeDir,
-						"management/pages/managementUserPage.vue"
+						"management/pages/management-user.vue"
 					),
 				},
                 {
 					name: "managementLog",
 					path: "/management/log",
-					file: resolve(themeDir, "management/pages/managementLogPage.vue"),
+					file: resolve(themeDir, "management/pages/management-log.vue"),
 				}
 			);
 		});

@@ -110,7 +110,7 @@ class AccountRepositoryImpl(AccountRepository):
 
     # DB에서 조회
     def findById(self, accountId):
-        print("여기까찌 옴")
+        print("findById 여기까찌 옴")
         try:
             account = Account.objects.get(id=accountId)
             print(f"Account 찾음: {account}")
@@ -166,3 +166,7 @@ class AccountRepositoryImpl(AccountRepository):
             return True
         except Account.DoesNotExist:
             return False
+    #게스트 이메일 수
+    def countEmail(self, guest_email):
+        return Account.objects.filter(email__startswith=guest_email).count()
+

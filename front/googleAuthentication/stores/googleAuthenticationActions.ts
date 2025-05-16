@@ -4,14 +4,26 @@ export const googleAuthenticationAction = {
   async requestGoogleLoginToDjango(): Promise<void> {
     const { djangoAxiosInstance } = axiosUtility.createAxiosInstances();
     try {
-      return djangoAxiosInstance
-        .get("/google-oauth/request-login-url")
-        .then((res) => {
-          console.log(`res: ${res}`);
-          window.location.href = res.data.url;
-        });
+      // try-catch 블록은 .then() 안에 있는 promise 체인과 섞여 실제 에러가
+      // try-catch로 잡히지 않을 수 있습니다.
+      const res = await djangoAxiosInstance.get("/google-oauth/request-login-url");
+      console.log("res.data:", res.data);
+
+      if (!res.data?.url) {
+        throw new Error("응답에 URL이 없습니다.");
+      }
+
+      window.location.href = res.data.url;
+      
+      // return djangoAxiosInstance
+      //   .get("/google-oauth/request-login-url")
+      //   .then((res) => {
+      //     console.log(`res: ${res}`);
+      //     window.location.href = res.data.url;
+      //   });
     } catch (error) {
       console.log("requestGoogleOauthRedirectionToDjango() 중 에러:", error);
+      throw error;  // 상위 함수에서 에러가 잡히도록 재전파 
     }
   },
 

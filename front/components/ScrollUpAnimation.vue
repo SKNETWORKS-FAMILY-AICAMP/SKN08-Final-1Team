@@ -18,9 +18,9 @@
   position: relative;
   display: block;
   font-size: 1.5vh;
-  color: rgba(255, 255, 255, 1);
+  color: rgb(0, 0, 0);
   text-decoration: none;
-  padding: 1vh 1vh 1vh 4vh; /* 기존 코드와 동일한 간격 */
+  padding: 5.5vh 1vh 6vh 4vh; /* 기존 코드와 동일한 간격 */
   display: flex;
   flex-direction: column; /* 세로 정렬 유지 */
   align-items: center;
@@ -36,7 +36,7 @@
   height: 0;
   border-left: 1vh solid transparent;
   border-right: 1vh solid transparent;
-  border-bottom: 1.5vh solid white;
+  border-bottom: 1.5vh solid rgb(0, 0, 0);
   transform: translate(-50%, -50%);
   animation: bounce 1.5s infinite;
 }
@@ -54,29 +54,31 @@
 
 @media (max-width: 768px) {
   .scroll {
-    width: 6vh;
-    height: 6vh;
-    font-size: 1.5rem;
+    width: 10h;
+    height: 15vh;
+    font-size: 1.5vh;
+    padding: 8vh 1vh 6vh 5vh;
   }
 
   .scroll::before {
     border-left: 1.2vh solid transparent;
     border-right: 1.2vh solid transparent;
-    border-bottom: 1.8vh solid white;
+    border-bottom: 1.8vh solid rgb(0, 0, 0);
   }
 }
 
 @media (max-width: 480px) {
   .scroll {
-    width: 7vh;
-    height: 7vh;
-    font-size: 1.8rem;
+    width: 15vh;
+    height: 20vh;
+    font-size: 2vh;
+    padding: 8vh 1vh 6vh 5vh;
   }
 
   .scroll::before {
     border-left: 1.4vh solid transparent;
     border-right: 1.4vh solid transparent;
-    border-bottom: 2vh solid white;
+    border-bottom: 2vh solid rgb(0, 0, 0);
   }
 }
 </style>

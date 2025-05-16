@@ -92,7 +92,6 @@ export default defineComponent({
 .home-third {
   width: 100%;
   min-height: 100vh;
-  background: url("@/assets/images/fixed/home_bg2.jpg") center center;
   background-size: cover;
   background-attachment: fixed;
   display: flex;

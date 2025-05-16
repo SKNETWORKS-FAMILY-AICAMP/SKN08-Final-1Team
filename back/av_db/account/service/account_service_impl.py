@@ -44,8 +44,6 @@ class AccountServiceImpl(AccountService):
         except ObjectDoesNotExist:
             return None
 
-
-
     # MyPage 회원정보 수정칸
     def findEmail(self, accountId):
         try:
@@ -64,8 +62,14 @@ class AccountServiceImpl(AccountService):
     def createWithdrawEnd(self, accountId,time):
         return self.__accountRepository.saveWithdrawEnd(accountId,time)
 
-
-
     # 회원 탈퇴
     def withdraw(self, accountId: int) -> bool:
         return self.__accountRepository.deleteAccount(accountId)
+
+    #게스트 회원가입
+    def createGuestAccount(self,new_guest_email,loginType):
+        return self.__accountRepository.save(new_guest_email,loginType)
+
+    #게스트 이메일 수 카운트
+    def countEmail(self, guest_email):
+        return self.__accountRepository.countEmail(guest_email)

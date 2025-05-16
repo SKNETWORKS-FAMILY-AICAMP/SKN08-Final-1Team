@@ -21,6 +21,7 @@ const setRedirectGoogleData = async () => {
 
   localStorage.setItem("userToken", userToken);
   googleAuthenticationStore.isAuthenticated = true;
+  googleAuthenticationStore.userToken = userToken;
 
   router.push("/");
 };
